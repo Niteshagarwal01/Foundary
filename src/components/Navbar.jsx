@@ -246,12 +246,6 @@ export default function Navbar({ activeSection }) {
           transition={{ delay: 0.6, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center gap-4 md:gap-5"
         >
-          <span
-            className="hidden lg:block font-display italic text-sm hover-glow transition-all duration-300"
-            style={{ color: "#4A4540" }}
-          >
-            code that works. design that sells.
-          </span>
 
           {isSignedIn ? (
             <div className="hidden sm:flex items-center gap-4 relative" ref={dropdownRef}>
