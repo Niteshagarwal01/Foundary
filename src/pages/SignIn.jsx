@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { supabase } from "../lib/supabaseClient";
 
 export default function SignInPage() {
@@ -9,25 +9,20 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 100 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 100 });
 
   useEffect(() => {
-    let ticking = false;
     const handleMouseMove = (e) => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setMousePosition({
-            x: (e.clientX / window.innerWidth - 0.5) * 20,
-            y: (e.clientY / window.innerHeight - 0.5) * 20,
-          });
-          ticking = false;
-        });
-        ticking = true;
-      }
+      mouseX.set((e.clientX / window.innerWidth - 0.5) * -40);
+      mouseY.set((e.clientY / window.innerHeight - 0.5) * -40);
     };
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [mouseX, mouseY]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,10 +60,10 @@ export default function SignInPage() {
     <div className="min-h-screen bg-[#050505] relative overflow-hidden font-sans">
       {/* ── Parallax background orbs ── */}
       <motion.div
-        animate={{ x: mousePosition.x * -2, y: mousePosition.y * -2 }}
-        transition={{ type: "spring", damping: 50, stiffness: 100 }}
         className="absolute pointer-events-none"
         style={{
+          x: smoothX,
+          y: smoothY,
           width: "700px", height: "700px",
           borderRadius: "50%",
           background: "radial-gradient(circle, rgba(201,163,85,0.35) 0%, transparent 70%)",
@@ -78,10 +73,10 @@ export default function SignInPage() {
         }}
       />
       <motion.div
-        animate={{ x: mousePosition.x * 2, y: mousePosition.y * 2 }}
-        transition={{ type: "spring", damping: 50, stiffness: 100 }}
         className="absolute pointer-events-none"
         style={{
+          x: smoothX,
+          y: smoothY,
           width: "500px", height: "500px",
           borderRadius: "50%",
           background: "radial-gradient(circle, rgba(140,110,50,0.4) 0%, transparent 70%)",
@@ -92,7 +87,7 @@ export default function SignInPage() {
       />
 
       {/* Massive Background Typography */}
-      <div className="absolute inset-0 flex flex-col justify-center overflow-hidden pointer-events-none opacity-[0.03] select-none z-0">
+      <div className="absolute inset-0 flex flex-col justify-center overflow-hidden pointer-events-none opacity-[0.08] select-none z-0">
         <h1 className="text-[25vw] md:text-[20vw] leading-none font-display uppercase whitespace-nowrap -ml-[10%] tracking-tighter">THE FOUNDRY</h1>
         <h1 className="text-[25vw] md:text-[20vw] leading-none font-serif italic whitespace-nowrap ml-[10%] tracking-tighter">Est. 2026</h1>
       </div>
