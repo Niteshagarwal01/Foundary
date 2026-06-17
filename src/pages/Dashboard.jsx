@@ -639,7 +639,7 @@ function LicensesTab({ licenses }) {
           className="grid grid-cols-1 md:grid-cols-2 gap-10"
         >
           {licenses.map((lic, i) => {
-            const fontDef = FONTS[lic.font_id];
+            const fontDef = FONTS.find(f => f.id === lic.font_id);
             const fontName = fontDef ? fontDef.name : lic.font_id;
             
             return (
