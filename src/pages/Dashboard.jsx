@@ -189,6 +189,7 @@ export default function Dashboard() {
       type: fontData?.category ? fontData.category.charAt(0).toUpperCase() + fontData.category.slice(1) : "Sans",
       weights: `${fontData?.weights?.length || 1} Weights`,
       date: new Date(fav.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      _rawFont: fontData // Pass the full font data for FontModal
     };
   });
 
@@ -551,7 +552,7 @@ function LibraryTab({ libraryFonts, loading, onSelectFont }) {
           {libraryFonts.map((font, i) => (
             <motion.div key={i} variants={{ hidden: { opacity: 0, y: 30, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" } } }}>
               <TiltCard 
-                onClick={() => onSelectFont(font)}
+                onClick={() => onSelectFont(font._rawFont)}
                 className="bg-gradient-to-br from-[#111] to-[#0A0A0A] border border-white/[0.06] rounded-2xl p-8 flex flex-col justify-between h-72 overflow-hidden hover:border-[#C9A355]/30 relative shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)] cursor-pointer"
               >
                 
