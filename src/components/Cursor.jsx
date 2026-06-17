@@ -53,21 +53,21 @@ export default function Cursor() {
         dotRef.current.style.transform = `translate(${x - 4}px, ${y - 4}px)`;
       }
 
-      // Spawn trail particle (throttle to every ~200ms to heavily reduce lag)
+      // Spawn trail particle (throttle to every ~60ms to heavily reduce lag but keep effect)
       const now = performance.now();
-      if (now - lastSpawnRef.current > 200) {
+      if (now - lastSpawnRef.current > 60) {
         lastSpawnRef.current = now;
         
-        // Strict limit of 10 particles
-        if (particlesRef.current.length < 10) {
+        // Strict limit of 35 particles
+        if (particlesRef.current.length < 35) {
           const isGold = Math.random() < 0.3;
           particlesRef.current.push({
             x, y,
             letter: TRAIL_LETTERS[Math.floor(Math.random() * TRAIL_LETTERS.length)],
             font:   TRAIL_FONTS[Math.floor(Math.random() * TRAIL_FONTS.length)],
-            size:   Math.random() * 12 + 10,
+            size:   Math.random() * 16 + 12,
             weight: Math.random() < 0.5 ? "400" : "700",
-            opacity: 0.6,
+            opacity: 0.7,
             vy: -(Math.random() * 0.4 + 0.2),
             vx: (Math.random() - 0.5) * 0.3,
             rotation: (Math.random() - 0.5) * 0.3,
@@ -111,7 +111,7 @@ export default function Cursor() {
         for (const p of particlesRef.current) {
           p.y  += p.vy;
           p.x  += p.vx;
-          p.opacity -= 0.05; // Fade out quickly (lives for ~12 frames)
+          p.opacity -= 0.025; // Fade out slightly slower (lives for ~40 frames)
           p.rotation += p.dr;
           
           ctx.globalAlpha = Math.max(0, p.opacity);
