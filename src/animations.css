@@ -1,0 +1,20 @@
+@keyframes anim-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.65; transform: scale(1.03); }
+}
+@keyframes anim-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes anim-glitch {
+  0%   { text-shadow: 2px 0 #C9A355, -2px 0 #e11d48; transform: skewX(0); }
+  20%  { text-shadow: -2px 0 #C9A355, 2px 0 #e11d48; transform: skewX(-2deg); }
+  40%  { text-shadow: 2px 2px #C9A355, -2px -2px #e11d48; transform: skewX(2deg); }
+  60%  { text-shadow: -2px 0 #C9A355, 2px 0 #e11d48; transform: skewX(0); }
+  80%  { text-shadow: 3px 0 #C9A355, -3px 0 #e11d48; transform: skewX(1deg); }
+  100% { text-shadow: 2px 0 #C9A355, -2px 0 #e11d48; transform: skewX(0); }
+}
+
+.anim-pulse  { animation: anim-pulse  1.6s ease-in-out infinite; }
+.anim-float  { animation: anim-float  2.4s ease-in-out infinite; }
+.anim-glitch { animation: anim-glitch 0.6s steps(1) infinite; }
