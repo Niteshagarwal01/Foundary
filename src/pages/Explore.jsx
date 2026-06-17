@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import FontLibrary from "../components/FontLibrary";
 import FontModal from "../components/FontModal";
+import SmoothScroll from "../components/SmoothScroll";
 
 export default function ExplorePage() {
   const [selectedFont, setSelectedFont] = useState(null);
 
   return (
-    <div className="min-h-screen w-full bg-[#080808] text-[#F4EFE6] font-sans selection:bg-[#C9A355] selection:text-[#0C0C0C] relative overflow-hidden flex flex-col">
+    <SmoothScroll>
+      <div className="min-h-screen w-full bg-[#080808] text-[#F4EFE6] font-sans selection:bg-[#C9A355] selection:text-[#0C0C0C] relative overflow-hidden flex flex-col">
       {/* Header */}
       <header className="px-6 md:px-14 py-8 flex items-center justify-between relative z-50">
         <Link to="/" className="flex items-center gap-3 group">
@@ -57,6 +59,7 @@ export default function ExplorePage() {
         open={!!selectedFont}
         onClose={() => setSelectedFont(null)}
       />
-    </div>
+      </div>
+    </SmoothScroll>
   );
 }

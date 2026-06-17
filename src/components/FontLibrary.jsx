@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/AppContext";
@@ -375,7 +375,7 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
 }
 
 // ─── Font Library Grid ────────────────────────────────────────────────────────
-export default function FontLibrary({ onSelectFont, previewMode = false }) {
+const FontLibrary = React.memo(function FontLibrary({ onSelectFont, previewMode = false }) {
   const [query,    setQuery]    = useState("");
   const [category, setCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
@@ -732,4 +732,6 @@ export default function FontLibrary({ onSelectFont, previewMode = false }) {
 
     </section>
   );
-}
+});
+
+export default FontLibrary;

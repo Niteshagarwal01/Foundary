@@ -19,7 +19,8 @@ export default function CartDrawer() {
   const tiers = [
     {
       name: "Desktop",
-      price: "$29",
+      price: "₹299",
+      amount: 299,
       desc: "For static images, logos, and physical products. Up to 3 devices.",
       type: "Desktop",
       seats: "3",
@@ -27,7 +28,8 @@ export default function CartDrawer() {
     },
     {
       name: "Web",
-      price: "$49",
+      price: "₹499",
+      amount: 499,
       desc: "For website embedding via @font-face. Up to 10k pageviews/mo.",
       type: "Web",
       seats: "1",
@@ -35,7 +37,8 @@ export default function CartDrawer() {
     },
     {
       name: "App / Broadcast",
-      price: "$199",
+      price: "₹1,499",
+      amount: 1499,
       desc: "For embedding in mobile apps, games, or broadcasting.",
       type: "App",
       seats: "Unlimited",
@@ -50,34 +53,66 @@ export default function CartDrawer() {
       return;
     }
 
-    setIsProcessing(true);
-    
-    // Simulate payment delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
     const tier = tiers[selectedTier];
+    setIsProcessing(true);
 
-    const { error } = await supabase.from("licenses").insert({
-      user_id: user.id,
-      font_id: cartFont.id,
-      license_type: tier.type,
-      seats: tier.seats,
-      pageviews: tier.pageviews
+    // RAZORPAY CONFIGURATION
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_YOUR_KEY_HERE", 
+      amount: tier.amount * 100, // Amount in paise
+      currency: "INR",
+      name: "The Foundry",
+      description: `${tier.name} License for ${cartFont?.name}`,
+      image: "https://your-foundry-logo-url.com/logo.png",
+      handler: async function (response) {
+        // Payment Succeeded!
+        // response.razorpay_payment_id
+        
+        // 1. Insert into Supabase
+        const { error } = await supabase.from("licenses").insert({
+          user_id: user.id,
+          font_id: cartFont.id,
+          license_type: tier.type,
+          seats: tier.seats,
+          pageviews: tier.pageviews
+        });
+
+        setIsProcessing(false);
+
+        if (error) {
+          console.error("Supabase Checkout error:", error);
+          alert("Payment succeeded but failed to issue license. Please contact support.");
+        } else {
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+            setCartOpen(false);
+            navigate("/dashboard");
+          }, 2000);
+        }
+      },
+      prefill: {
+        name: user?.user_metadata?.first_name || "Foundry User",
+        email: user?.email,
+      },
+      theme: {
+        color: "#C9A355",
+      },
+      modal: {
+        ondismiss: function() {
+          setIsProcessing(false);
+        }
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    
+    rzp.on('payment.failed', function (response){
+      setIsProcessing(false);
+      alert("Payment failed: " + response.error.description);
     });
 
-    setIsProcessing(false);
-
-    if (error) {
-      console.error("Checkout error:", error);
-      alert("Something went wrong with the checkout. Please try again.");
-    } else {
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setCartOpen(false);
-        navigate("/dashboard");
-      }, 2000);
-    }
+    rzp.open();
   };
 
   return (
