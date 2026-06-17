@@ -118,22 +118,19 @@ export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   
   // Global mouse tracking for background spotlight
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
 
   useEffect(() => {
-    let ticking = false;
     const handleMouseMove = (e) => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setMousePosition({ x: e.clientX, y: e.clientY });
-          ticking = false;
-        });
-        ticking = true;
-      }
+      mouseX.set(e.clientX - 400);
+      mouseY.set(e.clientY - 400);
     };
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [mouseX, mouseY]);
 
   useEffect(() => {
     if (!user) return;
@@ -206,13 +203,10 @@ export default function Dashboard() {
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="grain-overlay" style={{ zIndex: 1 }} />
         <motion.div
-          animate={{
-            x: mousePosition.x - 400,
-            y: mousePosition.y - 400,
-          }}
-          transition={{ type: "tween", ease: "linear", duration: 0.1 }}
           className="absolute w-[800px] h-[800px] rounded-full opacity-[0.03]"
           style={{
+            x: smoothX,
+            y: smoothY,
             background: "radial-gradient(circle, rgba(201,163,85,0.8) 0%, transparent 60%)",
             filter: "blur(40px)",
             willChange: "transform"

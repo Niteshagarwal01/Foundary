@@ -24,6 +24,15 @@ export default function Cursor() {
   const rafRef   = useRef(null);
   const lastSpawnRef = useRef(0);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.matchMedia("(pointer: coarse)").matches);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Size canvas to window
   const resizeCanvas = useCallback(() => {
     const c = canvasRef.current;
@@ -40,10 +49,16 @@ export default function Cursor() {
 
   // Animation loop
   useEffect(() => {
+    let wasEmpty = false;
     function drawLoop(ts) {
       rafRef.current = requestAnimationFrame(drawLoop);
       const canvas = canvasRef.current;
       if (!canvas) return;
+
+      const isEmpty = particlesRef.current.length === 0;
+      if (isEmpty && wasEmpty) return;
+      wasEmpty = isEmpty;
+
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -144,6 +159,8 @@ export default function Cursor() {
       document.removeEventListener("mouseout", onLeave);
     };
   }, []);
+
+  if (isMobile) return null;
 
   return (
     <>
