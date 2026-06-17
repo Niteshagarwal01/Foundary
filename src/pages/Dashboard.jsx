@@ -530,7 +530,7 @@ function LibraryTab({ libraryFonts, loading }) {
           </div>
           <h3 className="text-3xl md:text-4xl uppercase mb-4 text-[#F4EFE6] tracking-wide" style={{ fontFamily: "'Anton', sans-serif" }}>Your Vault is empty</h3>
           <p className="text-[#8A8078] mb-10 text-lg md:text-xl max-w-md leading-relaxed" style={{ fontFamily: "'Lora', serif", fontStyle: "italic" }}>The master collection awaits. Heart any typeface to add it to your personal vault.</p>
-          <Link to="/" className="inline-flex items-center justify-center px-10 py-4 bg-[#C9A355] text-[#0C0C0C] font-bold text-[11px] uppercase tracking-[0.25em] hover:bg-[#E2C07A] hover:-translate-y-1 hover:shadow-[0_15px_30px_-10px_rgba(201,163,85,0.5)] rounded-full transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <Link to="/explore" className="inline-flex items-center justify-center px-10 py-4 bg-[#C9A355] text-[#0C0C0C] font-bold text-[11px] uppercase tracking-[0.25em] hover:bg-[#E2C07A] hover:-translate-y-1 hover:shadow-[0_15px_30px_-10px_rgba(201,163,85,0.5)] rounded-full transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
             Explore Foundry
           </Link>
         </div>
@@ -629,7 +629,7 @@ function LicensesTab({ licenses }) {
           </div>
           <h3 className="text-3xl uppercase mb-4 text-[#F4EFE6]" style={{ fontFamily: "'Anton', sans-serif" }}>No Active Licenses</h3>
           <p className="text-[#8A8078] mb-10 max-w-md" style={{ fontFamily: "'Lora', serif", fontStyle: "italic" }}>You haven't purchased any commercial licenses yet. Start exploring the catalog to find your perfect typeface.</p>
-          <Link to="/" className="inline-flex px-8 py-3 bg-[#C9A355] text-[#0C0C0C] font-bold text-[11px] uppercase tracking-[0.2em] rounded-full hover:bg-[#E2C07A]">
+          <Link to="/explore" className="inline-flex px-8 py-3 bg-[#C9A355] text-[#0C0C0C] font-bold text-[11px] uppercase tracking-[0.2em] rounded-full hover:bg-[#E2C07A]">
             Explore Catalog
           </Link>
         </div>
