@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
 
 const navItems = [
   { id: "hero",     label: "Home"    },
@@ -230,7 +231,7 @@ export default function Navbar({ activeSection }) {
               />
             </div>
           ) : (
-            <SignInButton mode="modal">
+            <Link to="/sign-in">
               <button
                 className="hidden lg:flex items-center gap-2 hover-glow transition-all duration-300"
                 style={{ color: "#6B6560", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}
@@ -241,7 +242,7 @@ export default function Navbar({ activeSection }) {
                 </svg>
                 Sign In
               </button>
-            </SignInButton>
+            </Link>
           )}
 
           <motion.button
@@ -333,13 +334,38 @@ export default function Navbar({ activeSection }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="mt-12 pt-8 text-center flex flex-col items-center gap-3 w-full max-w-sm mx-auto"
+              className="mt-12 pt-8 text-center flex flex-col items-center gap-6 w-full max-w-sm mx-auto"
               style={{ borderTop: "1px solid rgba(201,163,85,0.15)" }}
             >
-              <div className="w-8 h-8 border border-[#C9A355] flex items-center justify-center mb-2">
-                <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: "1rem", color: "#C9A355" }}>F</span>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border border-[#C9A355] flex items-center justify-center mb-2">
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: "1rem", color: "#C9A355" }}>F</span>
+                </div>
+                <span className="font-display italic text-[#C9A355] text-xl">code that works. design that sells.</span>
               </div>
-              <span className="font-display italic text-[#C9A355] text-xl">code that works. design that sells.</span>
+
+              {isSignedIn ? (
+                <div className="flex items-center gap-4 bg-[#C9A355]/10 px-6 py-3 border border-[#C9A355]/30">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[#F4EFE6]">{user?.firstName}</span>
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: "w-8 h-8 border border-[#C9A355]",
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <Link to="/sign-in" className="w-full" onClick={() => setMobileMenuOpen(false)}>
+                  <button className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Sign In
+                  </button>
+                </Link>
+              )}
             </motion.div>
           </motion.div>
         )}
