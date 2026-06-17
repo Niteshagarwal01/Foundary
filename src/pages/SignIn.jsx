@@ -98,9 +98,9 @@ export default function SignInPage() {
       <div className="grain-overlay" style={{ zIndex: 1 }} />
 
       {/* ════════════════════════════════════
-          MOBILE LAYOUT  (hidden on lg+)
+          MOBILE/TABLET LAYOUT  (hidden on xl+)
       ════════════════════════════════════ */}
-      <div className="lg:hidden flex flex-col min-h-screen relative z-10">
+      <div className="xl:hidden flex flex-col min-h-screen relative z-10">
 
         {/* Mobile Hero Top Section */}
         <motion.div
@@ -301,9 +301,9 @@ export default function SignInPage() {
       </div>
 
       {/* ════════════════════════════════════
-          DESKTOP LAYOUT  (hidden on mobile)
+          DESKTOP LAYOUT  (hidden on tablet/mobile)
       ════════════════════════════════════ */}
-      <div className="hidden lg:flex min-h-screen items-center justify-center relative z-10">
+      <div className="hidden xl:flex min-h-screen items-center justify-center relative z-10">
         <div className="w-full max-w-7xl mx-auto flex flex-row items-center justify-between p-16">
 
           {/* Left Editorial */}
