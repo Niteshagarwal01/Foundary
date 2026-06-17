@@ -221,7 +221,26 @@ export default function Navbar({ activeSection }) {
 
           {isSignedIn ? (
             <div className="hidden sm:flex items-center gap-4">
-              <span className="text-xs font-semibold" style={{ color: "#C9A355", letterSpacing: "0.1em" }}>{user?.firstName}</span>
+              <Link to="/dashboard">
+                <motion.button
+                  className="shimmer-border px-4 py-2 text-xs font-bold tracking-[0.2em] uppercase"
+                  style={{
+                    background: "rgba(201,163,85,0.1)",
+                    border: "1px solid #C9A355",
+                    color: "#C9A355",
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                  whileHover={{
+                    scale: 1.04,
+                    background: "#C9A355",
+                    color: "#0C0C0C",
+                    boxShadow: "0 0 20px rgba(201,163,85,0.4)",
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  The Vault
+                </motion.button>
+              </Link>
               <UserButton 
                 appearance={{
                   elements: {
