@@ -36,6 +36,29 @@ export function usePreview() {
   return useContext(PreviewContext);
 }
 
+// ── Cart Context ───────────────────────────────────────────────────────────────
+export const CartContext = createContext({
+  cartOpen: false,
+  setCartOpen: () => {},
+  cartFont: null,
+  setCartFont: () => {},
+});
+
+export function CartProvider({ children }) {
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartFont, setCartFont] = useState(null);
+
+  return (
+    <CartContext.Provider value={{ cartOpen, setCartOpen, cartFont, setCartFont }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export function useCart() {
+  return useContext(CartContext);
+}
+
 // ── Theme Context ──────────────────────────────────────────────────────────────
 const themes = {
   dark: {

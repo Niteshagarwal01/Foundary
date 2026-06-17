@@ -1,26 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { ClerkProvider } from '@clerk/clerk-react'
-import { dark } from '@clerk/themes'
-import './index.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
+import './index.css'
+import { AuthProvider } from './context/AuthContext'
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key")
-}
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY} 
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      afterSignOutUrl="/"
-      appearance={{ baseTheme: dark }}
-    >
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <AuthProvider>
       <App />
-    </ClerkProvider>
-  </StrictMode>,
+    </AuthProvider>
+  </React.StrictMode>,
 )

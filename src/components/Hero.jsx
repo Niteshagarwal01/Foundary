@@ -227,10 +227,10 @@ export default function Hero({ onExplore, fontCount = 500 }) {
             className="hidden sm:flex flex-col gap-0.5 items-end"
           >
             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#C9A355", fontWeight: 600 }}>
-              Est.&nbsp;2024
+              Estb.&nbsp;2026
             </span>
             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3A3A3A", fontWeight: 600 }}>
-              {fontCount}+ Typefaces
+              DEVELOPED BY NITESH AGARWAL
             </span>
           </motion.div>
         </div>

@@ -1,4 +1,4 @@
-﻿import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
 
 const ERAS = [
@@ -123,7 +123,7 @@ const ERAS = [
     bg: "linear-gradient(145deg, #060a14 0%, #080e20 100%)",
   },
   {
-    year: "2024",
+    year: "2026",
     name: "The Foundry",
     script: "Variable & Beyond",
     description: "Variable fonts bend to any weight, width, and optical size. AI-assisted design, parametric type systems, and The Foundry Gazette — the future is now.",
@@ -264,7 +264,7 @@ export default function TypeTimeline() {
           className="mb-2"
         >
           <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C9A355", fontFamily: "'Inter', sans-serif", letterSpacing: "0.3em" }}>
-            1450 — 2024
+            1450 — 2026
           </span>
         </motion.div>
 

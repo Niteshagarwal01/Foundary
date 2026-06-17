@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
   { id: "hero",     label: "Home"    },
@@ -29,11 +29,28 @@ export default function Navbar({ activeSection }) {
   const [hoveredId,  setHoveredId]  = useState(null);
   const [favCount,   setFavCount]   = useState(() => getFavCount());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isSignedIn, user } = useUser();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  
+  const { session, user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  const isSignedIn = !!session;
+  const firstName = user?.user_metadata?.first_name || user?.email?.split('@')[0] || "User";
+  const initial = firstName.charAt(0).toUpperCase();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 60);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -46,6 +63,17 @@ export default function Navbar({ activeSection }) {
     return () => { document.body.style.overflow = ""; };
   }, [mobileMenuOpen]);
 
+  // Handle click outside for dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownRef]);
+
   // Listen for favorites changes dispatched by FontLibrary
   useEffect(() => {
     const handler = (e) => setFavCount(e.detail.count);
@@ -56,6 +84,12 @@ export default function Navbar({ activeSection }) {
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMobileMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setDropdownOpen(false);
+    navigate("/");
   };
 
   return (
@@ -220,7 +254,7 @@ export default function Navbar({ activeSection }) {
           </span>
 
           {isSignedIn ? (
-            <div className="hidden sm:flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-4 relative" ref={dropdownRef}>
               <Link to="/dashboard">
                 <motion.button
                   className="shimmer-border px-4 py-2 text-xs font-bold tracking-[0.2em] uppercase"
@@ -241,13 +275,52 @@ export default function Navbar({ activeSection }) {
                   The Vault
                 </motion.button>
               </Link>
-              <UserButton 
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox: "w-8 h-8 border border-[#C9A355]",
-                  }
-                }}
-              />
+              
+              {/* Custom User Avatar/Dropdown trigger */}
+              <button 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="w-8 h-8 rounded-full border flex items-center justify-center transition-all bg-[#0A0A0A] hover:bg-[#1A1A1A]"
+                style={{ borderColor: dropdownOpen ? "#C9A355" : "rgba(255,255,255,0.2)" }}
+              >
+                {user?.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span className="text-[#F4EFE6] text-[10px] font-bold font-sans">{initial}</span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-12 right-0 w-48 bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 flex flex-col"
+                  >
+                    <div className="px-4 py-3 border-b border-white/5">
+                      <p className="text-[#F4EFE6] text-sm font-medium truncate">{firstName}</p>
+                      <p className="text-[#6B6560] text-xs truncate mt-0.5">{user?.email}</p>
+                    </div>
+                    <Link 
+                      to="/dashboard" 
+                      onClick={() => setDropdownOpen(false)}
+                      className="px-4 py-2.5 text-xs text-[#A09890] hover:text-[#C9A355] hover:bg-white/5 transition-colors flex items-center gap-2 uppercase tracking-widest font-semibold"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                      Dashboard
+                    </Link>
+                    <button 
+                      onClick={handleSignOut}
+                      className="px-4 py-2.5 text-xs text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors flex items-center gap-2 uppercase tracking-widest font-semibold text-left border-t border-white/5"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
             </div>
           ) : (
             <Link to="/sign-up">
@@ -298,7 +371,7 @@ export default function Navbar({ activeSection }) {
             animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
             exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 flex flex-col bg-[#0C0C0C]/95 pt-20 px-8 pb-12 xl:hidden overflow-y-auto"
+            className="fixed inset-0 z-[100] flex flex-col bg-[#0C0C0C]/95 pt-20 px-8 pb-32 xl:hidden overflow-y-auto"
           >
             <div className="flex-1 flex flex-col mt-4 max-w-sm mx-auto w-full">
               {navItems.map((item, i) => {
@@ -352,15 +425,27 @@ export default function Navbar({ activeSection }) {
               </div>
 
               {isSignedIn ? (
-                <div className="flex items-center gap-4 bg-[#C9A355]/10 px-6 py-3 border border-[#C9A355]/30">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-[#F4EFE6]">{user?.firstName}</span>
-                  <UserButton 
-                    appearance={{
-                      elements: {
-                        userButtonAvatarBox: "w-8 h-8 border border-[#C9A355]",
-                      }
-                    }}
-                  />
+                <div className="flex flex-col gap-3 w-full">
+                  <div className="flex items-center justify-between bg-[#C9A355]/5 px-6 py-4 border border-[#C9A355]/20">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full border border-[#C9A355] flex items-center justify-center bg-[#0A0A0A]">
+                        {user?.user_metadata?.avatar_url ? (
+                          <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <span className="text-[#F4EFE6] text-[10px] font-bold font-sans">{initial}</span>
+                        )}
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-widest text-[#F4EFE6]">{firstName}</span>
+                    </div>
+                  </div>
+                  
+                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase">
+                    The Vault
+                  </Link>
+
+                  <button onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} className="w-full flex items-center justify-center gap-3 bg-transparent border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 text-red-400 transition-colors py-4 text-xs font-bold tracking-widest uppercase">
+                    Sign Out
+                  </button>
                 </div>
               ) : (
                 <Link to="/sign-in" className="w-full" onClick={() => setMobileMenuOpen(false)}>

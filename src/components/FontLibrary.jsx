@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/AppContext";
 import { supabase } from "../lib/supabaseClient";
 import { FONTS } from "../data/fonts";
 import { loadFont } from "../utils/fontLoader";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CATEGORIES = ["All", "Foundry", "Serif", "Sans", "Display", "Script", "Mono", "Saved"];
-const PER_PAGE   = 48;
-const ease       = [0.16, 1, 0.3, 1];
+const INITIAL_COUNT = 18;
+const LOAD_MORE_COUNT = 18;const ease       = [0.16, 1, 0.3, 1];
 
 const LS_KEY = "foundry-favorites";
 
@@ -227,6 +228,7 @@ function HeartButton({ fontId, isFavorited, onToggle }) {
 function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, previewState }) {
   const [hov, setHov] = useState(false);
   const ref = useIntersectionFont(font.family, font.weights);
+  const { setCartOpen, setCartFont } = useCart();
 
   // Resolve display text: use preview text if set, else font name
   const displayText = previewState.text || font.name;
@@ -247,13 +249,11 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
       transition={{ duration: 0.35, ease }}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
-      onClick={() => onSelect(font)}
       data-cursor="select"
       className="relative flex flex-col justify-between p-5 overflow-hidden group"
       style={{
         background: hov ? "#161616" : "#0F0F0F",
         border: `1px solid ${hov ? "rgba(201,163,85,0.3)" : "rgba(244,239,230,0.06)"}`,
-        cursor: "none",
         minHeight: "160px",
         transform: hov ? "translateY(-4px)" : "translateY(0px)",
         boxShadow: hov ? "0 10px 30px -10px rgba(201,163,85,0.15)" : "none",
@@ -281,6 +281,8 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
 
       {/* Category label */}
       <span
+        onClick={() => onSelect(font)}
+        className="cursor-pointer"
         style={{
           fontFamily: "'Inter', sans-serif",
           fontSize: "8px",
@@ -299,7 +301,8 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
 
       {/* Font preview — name or custom text */}
       <div
-        className="flex-1 flex items-center overflow-hidden"
+        onClick={() => onSelect(font)}
+        className="flex-1 flex items-center overflow-hidden cursor-pointer"
         style={{
           fontFamily: `'${font.family}', serif`,
           fontSize: displaySize
@@ -321,7 +324,7 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
       </div>
 
       {/* Bottom meta */}
-      <div className="flex items-center justify-between mt-3">
+      <div className="flex items-center justify-between mt-3 z-10 relative">
         <div className="flex items-center gap-2">
           {/* Heart button */}
           <HeartButton
@@ -329,13 +332,22 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
             isFavorited={isFavorited}
             onToggle={onToggleFavorite}
           />
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "9px", color: "#3A3A3A", letterSpacing: "0.12em" }}>
-            {font.designer?.split(" ").slice(-1)[0]} · {font.year}
-          </span>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setCartFont(font);
+              setCartOpen(true);
+            }}
+            className="h-6 px-3 flex items-center justify-center border border-[#C9A355]/30 text-[#C9A355] text-[9px] font-bold uppercase tracking-widest hover:bg-[#C9A355] hover:text-[#0C0C0C] transition-colors rounded-sm"
+          >
+            Buy
+          </button>
         </div>
         <motion.span
+          onClick={() => onSelect(font)}
           animate={{ opacity: hov ? 1 : 0, x: hov ? 0 : 4 }}
           transition={{ duration: 0.2 }}
+          className="cursor-pointer"
           style={{ fontFamily: "'Inter', sans-serif", fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#C9A355" }}
         >
           Preview →
@@ -349,13 +361,14 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
 export default function FontLibrary({ onSelectFont }) {
   const [query,    setQuery]    = useState("");
   const [category, setCategory] = useState("All");
-  const [page,     setPage]     = useState(0);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const [sortMode, setSortMode] = useState("alpha");
   const [favorites, setFavoritesState] = useState([]);
   const [copiedVisible, setCopiedVisible] = useState(false);
   const copiedTimerRef = useRef(null);
 
-  const { isSignedIn, user } = useUser();
+  const { session, user } = useAuth();
+  const isSignedIn = !!session;
 
   // Load favorites (Cloud if signed in, LocalStorage if guest)
   useEffect(() => {
@@ -443,10 +456,26 @@ export default function FontLibrary({ onSelectFont }) {
     );
 
   const total   = filtered.length;
-  const pages   = Math.ceil(total / PER_PAGE);
-  const visible = filtered.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
+  const visible = filtered.slice(0, visibleCount);
 
-  useEffect(() => { setPage(0); }, [query, category]);
+  useEffect(() => { setVisibleCount(INITIAL_COUNT); }, [query, category]);
+
+  // Infinite Scroll Observer
+  const loaderRef = useRef(null);
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && visibleCount < total) {
+          setVisibleCount(c => Math.min(c + LOAD_MORE_COUNT, total));
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount, total]);
 
   return (
     <section id="library" style={{ background: "#080808", paddingBottom: "100px", position: "relative", overflow: "hidden" }}>
@@ -651,69 +680,22 @@ export default function FontLibrary({ onSelectFont }) {
         )}
       </div>
 
-      {/* Pagination */}
-      {pages > 1 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center justify-center gap-2 mt-10 px-6"
-        >
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="px-4 py-2 text-xs font-semibold uppercase transition-all"
-            style={{
-              border: "1px solid rgba(244,239,230,0.1)",
-              color: page === 0 ? "#2A2A2A" : "#6B6560",
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: "0.15em",
-              cursor: page === 0 ? "not-allowed" : "default",
-            }}
-          >
-            ← Prev
-          </button>
-
-          <div className="flex gap-1">
-            {Array.from({ length: Math.min(pages, 7) }, (_, i) => {
-              const p = pages <= 7 ? i : page < 4 ? i : page >= pages - 4 ? pages - 7 + i : page - 3 + i;
-              return (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className="w-8 h-8 text-xs font-semibold transition-all"
-                  style={{
-                    background: p === page ? "#C9A355" : "transparent",
-                    color: p === page ? "#0C0C0C" : "#4A4540",
-                    border: `1px solid ${p === page ? "#C9A355" : "rgba(244,239,230,0.08)"}`,
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                >
-                  {p + 1}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
-            disabled={page >= pages - 1}
-            className="px-4 py-2 text-xs font-semibold uppercase transition-all"
-            style={{
-              border: "1px solid rgba(244,239,230,0.1)",
-              color: page >= pages - 1 ? "#2A2A2A" : "#6B6560",
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: "0.15em",
-              cursor: page >= pages - 1 ? "not-allowed" : "default",
-            }}
-          >
-            Next →
-          </button>
-
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "10px", color: "#3A3A3A", letterSpacing: "0.15em", marginLeft: "16px" }}>
-            {page * PER_PAGE + 1}–{Math.min((page + 1) * PER_PAGE, total)} of {total}
-          </span>
-        </motion.div>
+      {/* Infinite Scroll Sentinel */}
+      {visibleCount < total && (
+        <div ref={loaderRef} className="h-20 w-full flex items-center justify-center mt-8">
+          <div className="w-8 h-8 border-2 border-[#C9A355] border-t-transparent rounded-full animate-spin" />
+        </div>
       )}
+
+      {/* Stats */}
+      <div className="text-center mt-12 mb-8 px-6 text-[#6B6560] text-[10px] tracking-widest uppercase flex items-center justify-center gap-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="h-px bg-white/[0.04] flex-1 max-w-[100px]" />
+        <span>
+          {total === 0 ? "0 results" : `Showing 1–${Math.min(visibleCount, total)} of ${total} Typefaces`}
+        </span>
+        <div className="h-px bg-white/[0.04] flex-1 max-w-[100px]" />
+      </div>
+
     </section>
   );
 }
