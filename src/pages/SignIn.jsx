@@ -89,6 +89,12 @@ export default function SignInPage() {
         }}
       />
 
+      {/* Massive Background Typography */}
+      <div className="absolute inset-0 flex flex-col justify-center overflow-hidden pointer-events-none opacity-[0.03] select-none z-0">
+        <h1 className="text-[20vw] leading-none font-display uppercase whitespace-nowrap -ml-[10%] tracking-tighter">THE FOUNDRY</h1>
+        <h1 className="text-[20vw] leading-none font-serif italic whitespace-nowrap ml-[10%] tracking-tighter">Est. 2026</h1>
+      </div>
+
       <div className="grain-overlay" style={{ zIndex: 1 }} />
 
       {/* ════════════════════════════════════

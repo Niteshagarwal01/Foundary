@@ -108,6 +108,12 @@ export default function SignUpPage() {
         }}
       />
 
+      {/* Massive Background Typography */}
+      <div className="absolute inset-0 flex flex-col justify-center overflow-hidden pointer-events-none opacity-[0.03] select-none z-0">
+        <h1 className="text-[20vw] leading-none font-display uppercase whitespace-nowrap ml-[5%] tracking-tighter">CREATE</h1>
+        <h1 className="text-[20vw] leading-none font-serif italic whitespace-nowrap -ml-[5%] tracking-tighter">Legacy</h1>
+      </div>
+
       <div className="grain-overlay" style={{ zIndex: 1 }} />
 
       {/* ════════════════════════════════════
