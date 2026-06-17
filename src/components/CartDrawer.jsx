@@ -54,65 +54,8 @@ export default function CartDrawer() {
     }
 
     const tier = tiers[selectedTier];
-    setIsProcessing(true);
-
-    // RAZORPAY CONFIGURATION
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_YOUR_KEY_HERE", 
-      amount: tier.amount * 100, // Amount in paise
-      currency: "INR",
-      name: "The Foundry",
-      description: `${tier.name} License for ${cartFont?.name}`,
-      image: "https://your-foundry-logo-url.com/logo.png",
-      handler: async function (response) {
-        // Payment Succeeded!
-        // response.razorpay_payment_id
-        
-        // 1. Insert into Supabase
-        const { error } = await supabase.from("licenses").insert({
-          user_id: user.id,
-          font_id: cartFont.id,
-          license_type: tier.type,
-          seats: tier.seats,
-          pageviews: tier.pageviews
-        });
-
-        setIsProcessing(false);
-
-        if (error) {
-          console.error("Supabase Checkout error:", error);
-          alert("Payment succeeded but failed to issue license. Please contact support.");
-        } else {
-          setSuccess(true);
-          setTimeout(() => {
-            setSuccess(false);
-            setCartOpen(false);
-            navigate("/dashboard");
-          }, 2000);
-        }
-      },
-      prefill: {
-        name: user?.user_metadata?.first_name || "Foundry User",
-        email: user?.email,
-      },
-      theme: {
-        color: "#C9A355",
-      },
-      modal: {
-        ondismiss: function() {
-          setIsProcessing(false);
-        }
-      }
-    };
-
-    const rzp = new window.Razorpay(options);
-    
-    rzp.on('payment.failed', function (response){
-      setIsProcessing(false);
-      alert("Payment failed: " + response.error.description);
-    });
-
-    rzp.open();
+    setCartOpen(false);
+    navigate("/checkout", { state: { font: cartFont, tier: tier } });
   };
 
   return (
@@ -197,16 +140,18 @@ export default function CartDrawer() {
                 <button 
                   onClick={handleCheckout}
                   disabled={isProcessing}
-                  className="w-full py-4 bg-[#C9A355] text-[#0C0C0C] font-bold text-xs uppercase tracking-widest hover:bg-[#F0D48A] transition-colors relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full bg-[#C9A355] text-[#0C0C0C] font-bold py-4 text-[11px] uppercase tracking-[0.2em] hover:bg-[#E2C07A] transition-colors mt-6 flex justify-center items-center gap-2"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
-                  <span className="relative z-10">{isProcessing ? "Processing..." : user ? "Confirm & Pay →" : "Sign In to Checkout →"}</span>
-                  {!isProcessing && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />}
+                  {isProcessing ? "PROCESSING..." : "PROCEED TO CHECKOUT \u2192"}
                 </button>
               )}
-              <p className="text-center text-[10px] text-[#6B6560] mt-4 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Secure Simulation checkout
-              </p>
-            </div>
+                <div className="text-center mt-4">
+                  <span className="text-[8px] tracking-widest text-[#6B6560] uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    SECURE CHECKOUT
+                  </span>
+                </div>
+              </div>
           </motion.div>
         </>
       )}

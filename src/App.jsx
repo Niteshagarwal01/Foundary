@@ -5,6 +5,7 @@ import ExplorePage from "./pages/Explore";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
+import Checkout from "./pages/Checkout";
 import Cursor from "./components/Cursor";
 import { CartProvider } from "./context/AppContext";
 import CartDrawer from "./components/CartDrawer";
@@ -35,6 +36,11 @@ export default function App() {
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/sign-in/*" element={<SignInPage />} />
             <Route path="/sign-up/*" element={<SignUpPage />} />
+            <Route path="/checkout" element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } />
 
             {/* Protected Dashboard Route */}
             <Route 
