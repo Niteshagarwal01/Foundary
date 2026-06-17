@@ -348,7 +348,7 @@ export default function Navbar({ activeSection }) {
           )}
 
           <button
-            className="xl:hidden flex items-center justify-center p-2 text-[#C9A355] relative z-[60]"
+            className="xl:hidden flex items-center justify-center p-2 text-[#C9A355] relative z-[110]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -439,24 +439,34 @@ export default function Navbar({ activeSection }) {
                     </div>
                   </div>
                   
-                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase">
+                  <button 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate("/dashboard");
+                    }} 
+                    className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase"
+                  >
                     The Vault
-                  </Link>
+                  </button>
 
                   <button onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} className="w-full flex items-center justify-center gap-3 bg-transparent border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 text-red-400 transition-colors py-4 text-xs font-bold tracking-widest uppercase">
                     Sign Out
                   </button>
                 </div>
               ) : (
-                <Link to="/sign-in" className="w-full" onClick={() => setMobileMenuOpen(false)}>
-                  <button className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    Sign In
-                  </button>
-                </Link>
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate("/sign-in");
+                  }} 
+                  className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  Sign In
+                </button>
               )}
             </motion.div>
           </motion.div>
