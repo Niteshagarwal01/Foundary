@@ -220,7 +220,7 @@ export default function Navbar({ activeSection }) {
           </span>
 
           {isSignedIn ? (
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-4">
               <span className="text-xs font-semibold" style={{ color: "#C9A355", letterSpacing: "0.1em" }}>{user?.firstName}</span>
               <UserButton 
                 appearance={{
@@ -231,41 +231,29 @@ export default function Navbar({ activeSection }) {
               />
             </div>
           ) : (
-            <Link to="/sign-in">
-              <button
-                className="hidden lg:flex items-center gap-2 hover-glow transition-all duration-300"
-                style={{ color: "#6B6560", fontFamily: "'Inter', sans-serif", fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}
+            <Link to="/sign-up">
+              <motion.button
+                className="hidden sm:block shimmer-border px-5 py-2 text-xs font-semibold tracking-widest uppercase"
+                style={{
+                  border: "1px solid #C9A355",
+                  color: "#C9A355",
+                  letterSpacing: "0.18em",
+                  fontFamily: "'Inter', sans-serif",
+                  transition: "all 0.3s ease",
+                }}
+                whileHover={{
+                  scale: 1.04,
+                  background: "#C9A355",
+                  color: "#0C0C0C",
+                  boxShadow: "0 0 20px rgba(201,163,85,0.4)",
+                }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.25 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                Sign In
-              </button>
+                Try Free
+              </motion.button>
             </Link>
           )}
-
-          <motion.button
-            onClick={() => scrollTo("library")}
-            className="hidden sm:block shimmer-border px-5 py-2 text-xs font-semibold tracking-widest uppercase"
-            style={{
-              border: "1px solid #C9A355",
-              color: "#C9A355",
-              letterSpacing: "0.18em",
-              fontFamily: "'Inter', sans-serif",
-              transition: "all 0.3s ease",
-            }}
-            whileHover={{
-              scale: 1.04,
-              background: "#C9A355",
-              color: "#0C0C0C",
-              boxShadow: "0 0 20px rgba(201,163,85,0.4)",
-            }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.25 }}
-          >
-            Try Free
-          </motion.button>
 
           <button
             className="xl:hidden flex items-center justify-center p-2 text-[#C9A355] relative z-[60]"
