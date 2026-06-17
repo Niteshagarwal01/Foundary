@@ -107,13 +107,13 @@ export default function SignInPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          className="relative flex flex-col justify-end overflow-hidden px-8 pt-16 pb-10"
+          className="relative flex flex-col justify-end overflow-hidden px-8 pt-20 pb-10 md:items-center md:text-center"
           style={{ minHeight: "42vh" }}
         >
           {/* Back button */}
           <Link
             to="/"
-            className="absolute top-12 left-6 flex items-center gap-2 group"
+            className="absolute top-12 left-6 md:left-12 flex items-center gap-2 group z-20"
           >
             <div className="w-8 h-8 border border-[#C9A355]/30 flex items-center justify-center group-hover:border-[#C9A355] group-hover:shadow-[0_0_12px_rgba(201,163,85,0.3)] transition-all duration-300">
               <svg className="w-3.5 h-3.5 text-[#C9A355] transition-transform duration-300 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,9 +127,9 @@ export default function SignInPage() {
 
           {/* Giant background F watermark */}
           <div
-            className="absolute right-0 top-0 select-none pointer-events-none"
+            className="absolute right-0 md:right-auto md:left-1/2 md:-translate-x-1/2 top-0 select-none pointer-events-none"
             style={{
-              fontSize: "52vw",
+              fontSize: "clamp(300px, 52vw, 500px)",
               fontFamily: "'Playfair Display', serif",
               fontWeight: 700,
               fontStyle: "italic",
@@ -141,46 +141,48 @@ export default function SignInPage() {
             F
           </div>
 
-          {/* Thin gold rule */}
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="w-12 h-[2px] mb-5 origin-left"
-            style={{ background: "linear-gradient(90deg, #C9A355, transparent)" }}
-          />
+          <div className="relative z-10 w-full md:max-w-lg md:mx-auto md:flex md:flex-col md:items-center">
+            {/* Thin gold rule */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="w-12 h-[2px] mb-5 origin-left md:origin-center"
+              style={{ background: "linear-gradient(90deg, #C9A355, transparent)" }}
+            />
 
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[#F4EFE6] uppercase tracking-tighter leading-[0.85] mb-3"
-            style={{ fontFamily: "'Anton', sans-serif", fontSize: "clamp(3.2rem, 16vw, 5rem)" }}
-          >
-            Enter
-          </motion.h1>
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              fontFamily: "'Kaushan Script', cursive",
-              fontSize: "clamp(2.8rem, 14vw, 4.5rem)",
-              color: "#C9A355",
-              lineHeight: 1,
-            }}
-          >
-            The Vault
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-4 text-sm leading-relaxed max-w-[260px]"
-            style={{ fontFamily: "'Lora', serif", fontStyle: "italic", color: "#6B6560" }}
-          >
-            Access your curated typefaces and exclusive releases.
-          </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[#F4EFE6] uppercase tracking-tighter leading-[0.85] mb-3"
+              style={{ fontFamily: "'Anton', sans-serif", fontSize: "clamp(3.2rem, 16vw, 5.5rem)" }}
+            >
+              Enter
+            </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                fontFamily: "'Kaushan Script', cursive",
+                fontSize: "clamp(2.8rem, 14vw, 4.8rem)",
+                color: "#C9A355",
+                lineHeight: 1,
+              }}
+            >
+              The Vault
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="mt-4 text-sm leading-relaxed max-w-[260px] md:max-w-sm"
+              style={{ fontFamily: "'Lora', serif", fontStyle: "italic", color: "#6B6560" }}
+            >
+              Access your curated typefaces and exclusive releases.
+            </motion.p>
+          </div>
         </motion.div>
 
         {/* Mobile Form Panel */}
@@ -188,15 +190,15 @@ export default function SignInPage() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-1 relative"
+          className="flex-1 relative w-full"
           style={{
             background: "linear-gradient(180deg, rgba(10,10,10,0) 0%, #090909 8%)",
           }}
         >
           {/* Divider line */}
-          <div className="w-full h-[1px] mb-0" style={{ background: "linear-gradient(90deg, transparent, rgba(201,163,85,0.15) 50%, transparent)" }} />
+          <div className="w-full h-[1px] mb-0 md:hidden" style={{ background: "linear-gradient(90deg, transparent, rgba(201,163,85,0.15) 50%, transparent)" }} />
 
-          <div className="px-6 pt-8 pb-12">
+          <div className="px-6 pt-8 pb-12 md:max-w-md md:mx-auto md:bg-[#0A0A0A]/60 md:backdrop-blur-2xl md:border md:border-white/[0.05] md:shadow-[0_0_80px_rgba(0,0,0,0.5)] md:p-10 md:mt-6 md:rounded-2xl md:relative md:z-20">
             <div className="mb-8">
               <h2 className="font-display text-[#F4EFE6] text-2xl tracking-[0.3em] uppercase mb-1">Sign In</h2>
               <p className="font-sans text-[#4A4540] text-[10px] uppercase tracking-[0.2em]">Authenticate to continue</p>
