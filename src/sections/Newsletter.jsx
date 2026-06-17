@@ -148,6 +148,26 @@ export default function Newsletter() {
         }
         throw new Error(error.message);
       }
+
+      // Also send email notification to admin via FormSubmit
+      try {
+        await fetch("https://formsubmit.co/ajax/musicniteshagarwal@gmail.com", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            _subject: "New Foundry Newsletter Subscriber! 🎉",
+            email: trimmed,
+            message: `A new user has joined the Foundry Gazette!\n\nSubscriber Email: ${trimmed}\nTime: ${new Date().toLocaleString()}`,
+          })
+        });
+      } catch (e) {
+        // Silently fail if admin notification fails, don't break the user experience
+        console.error("Admin notification failed", e);
+      }
+
       setStatus("success");
     } catch (err) {
       setErrorMsg(err.message || "Failed to subscribe. Please try again.");
