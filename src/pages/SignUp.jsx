@@ -115,10 +115,7 @@ export default function SignUpPage() {
         
         {/* Left Typography Panel */}
         <motion.div
-          className="hidden md:flex w-full md:w-[45%] lg:w-[50%] flex-col justify-center px-8 pt-16 pb-10 md:px-16 lg:px-24 xl:px-32 relative"
-          style={{
-            background: "linear-gradient(90deg, rgba(8,8,8,0.9) 0%, rgba(8,8,8,0) 100%)",
-          }}
+          className="flex w-full md:w-[45%] lg:w-[50%] flex-col justify-center px-8 pt-32 pb-10 md:pt-16 md:px-16 lg:px-24 xl:px-32 relative"
         >
           <Link
             to="/"
@@ -183,15 +180,13 @@ export default function SignUpPage() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-1 relative w-full flex items-center justify-center p-6 md:p-12"
-          style={{
-            background: "linear-gradient(180deg, rgba(10,10,10,0) 0%, #090909 8%)",
-          }}
+          className="flex-1 relative w-full flex items-center justify-center p-6 md:p-12 pb-20"
         >
           <Link
             to="/"
-            className="md:hidden absolute top-6 left-6 flex items-center gap-3 group z-20"
+            className="md:hidden absolute top-6 left-6 flex items-center gap-3 group z-20 opacity-0 pointer-events-none"
           >
+            {/* Hidden on mobile */}
             <div className="w-10 h-10 border border-[#C9A355]/40 flex items-center justify-center bg-[#C9A355]/5 backdrop-blur-sm">
               <svg className="w-4 h-4 text-[#C9A355]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
