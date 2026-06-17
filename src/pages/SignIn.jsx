@@ -93,7 +93,7 @@ export default function SignInPage() {
       {/* Massive Background Typography */}
       <div className="absolute inset-0 flex flex-col justify-center overflow-hidden pointer-events-none opacity-[0.03] select-none">
         <h1 className="text-[20vw] leading-none font-display uppercase whitespace-nowrap -ml-[10%] tracking-tighter">THE FOUNDRY</h1>
-        <h1 className="text-[20vw] leading-none font-serif italic whitespace-nowrap ml-[10%] tracking-tighter">Est. 2024</h1>
+        <h1 className="text-[20vw] leading-none font-serif italic whitespace-nowrap ml-[10%] tracking-tighter">Est. 2026</h1>
       </div>
 
       <div className="grain-overlay" style={{ zIndex: 0 }} />
@@ -138,12 +138,13 @@ export default function SignInPage() {
           {/* Card Glow Effect */}
           <div className="absolute -inset-[1px] bg-gradient-to-b from-[#C9A355]/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-sm" />
           
-          <div className="relative bg-[#0A0A0A]/60 backdrop-blur-2xl border border-white/[0.05] p-10 lg:p-12 shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+          <div className="relative bg-[#0A0A0A]/60 backdrop-blur-2xl border border-white/[0.05] p-10 lg:p-12 shadow-[0_0_80px_rgba(0,0,0,0.5)] mt-12 lg:mt-0">
             
-            <Link to="/" className="lg:hidden inline-block group mb-10 mx-auto w-fit">
-              <div className="w-12 h-12 border mx-auto flex items-center justify-center border-[#C9A355]/40 transition-all duration-300">
-                <span className="font-serif italic font-bold text-2xl text-[#C9A355]">F</span>
-              </div>
+            <Link to="/" className="lg:hidden absolute -top-16 left-0 flex items-center text-[#6B6560] hover:text-[#C9A355] font-sans text-xs tracking-widest uppercase transition-colors group">
+              <svg className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Home
             </Link>
 
             <div className="mb-10 text-center lg:text-left">

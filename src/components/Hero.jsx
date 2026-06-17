@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, useMotionValue, useSpring, useScroll, useTransform } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -387,8 +388,8 @@ export default function Hero({ onExplore, fontCount = 500 }) {
             transition={{ delay: 1.15, duration: 0.7, ease }}
             className="flex flex-col sm:w-auto gap-5 lg:gap-3 items-center"
           >
-            <button
-              onClick={onExplore}
+            <Link
+              to="/sign-up"
               className="w-[280px] lg:w-[260px] flex items-center justify-center gap-3 px-7 py-4 lg:py-3.5 text-[13px] lg:text-xs font-bold uppercase transition-all duration-300 group"
               style={{ background: "#C9A355", color: "#0C0C0C", letterSpacing: "0.2em", fontFamily: "'Inter', sans-serif" }}
               onMouseEnter={(e) => { 
@@ -402,14 +403,14 @@ export default function Hero({ onExplore, fontCount = 500 }) {
                 e.currentTarget.style.boxShadow = "none";
               }}
             >
-              Explore {fontCount}+ Fonts
+              Sign Up Now
               <motion.svg 
                 className="transition-transform duration-300 group-hover:translate-x-1"
                 width="14" height="14" viewBox="0 0 24 24" fill="none"
               >
                 <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </motion.svg>
-            </button>
+            </Link>
             <button
               onClick={() => document.getElementById("library")?.scrollIntoView({ behavior: "smooth" })}
               className="w-[280px] lg:w-[260px] flex items-center justify-center gap-2 px-7 py-4 lg:py-3.5 text-[13px] lg:text-xs font-bold uppercase transition-all duration-300"
