@@ -15,6 +15,8 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY} 
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
       afterSignOutUrl="/"
       appearance={{ baseTheme: dark }}
     >
