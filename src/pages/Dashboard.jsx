@@ -278,7 +278,18 @@ export default function Dashboard() {
         </nav>
 
         {/* Footer actions */}
-        <div className="mt-auto pt-8 border-t border-white/[0.04]">
+        <div className="mt-auto pt-8 border-t border-white/[0.04] flex flex-col gap-4">
+          <Link
+            to="/"
+            className="text-[#6B6560] hover:text-[#F4EFE6] transition-colors text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-3 group"
+          >
+            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 border border-transparent group-hover:border-white/20 transition-all duration-300">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            Back to Home
+          </Link>
           <button
             onClick={() => signOut(() => navigate("/"))}
             className="text-[#6B6560] hover:text-[#C9A355] transition-colors text-[10px] uppercase tracking-[0.2em] font-bold flex items-center gap-3 group"
@@ -303,7 +314,14 @@ export default function Dashboard() {
             </div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#F4EFE6]" style={{ fontFamily: "'Inter', sans-serif" }}>The Foundry</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/"
+              className="w-8 h-8 rounded-full border border-white/[0.04] hover:border-white/20 flex items-center justify-center bg-[#0C0C0C] text-[#6B6560] hover:text-[#F4EFE6] transition-colors"
+              title="Back to Home"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            </Link>
             <button
               onClick={() => signOut(() => navigate("/"))}
               className="w-8 h-8 rounded-full border border-white/[0.04] hover:border-[#C9A355]/40 flex items-center justify-center bg-[#0C0C0C] text-[#6B6560] hover:text-[#C9A355] transition-colors"
