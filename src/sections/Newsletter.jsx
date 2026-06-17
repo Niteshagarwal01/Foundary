@@ -117,6 +117,8 @@ function CornerOrnaments() {
   );
 }
 
+import { supabase } from "../lib/supabaseClient";
+
 export default function Newsletter() {
   const [email, setEmail]       = useState("");
   const [status, setStatus]     = useState("idle"); // idle | loading | success | error
@@ -134,9 +136,23 @@ export default function Newsletter() {
     }
     setStatus("loading");
     setErrorMsg("");
-    // Simulate async subscription
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("success");
+
+    try {
+      const { error } = await supabase
+        .from('subscribers')
+        .insert([{ email: trimmed }]);
+
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error("You are already subscribed!");
+        }
+        throw new Error(error.message);
+      }
+      setStatus("success");
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to subscribe. Please try again.");
+      setStatus("error");
+    }
   };
 
   return (

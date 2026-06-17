@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@clerk/clerk-react";
+import { supabase } from "../lib/supabaseClient";
 import { FONTS } from "../data/fonts";
 import { loadFont } from "../utils/fontLoader";
 
@@ -349,9 +351,32 @@ export default function FontLibrary({ onSelectFont }) {
   const [category, setCategory] = useState("All");
   const [page,     setPage]     = useState(0);
   const [sortMode, setSortMode] = useState("alpha");
-  const [favorites, setFavoritesState] = useState(() => getFavorites());
+  const [favorites, setFavoritesState] = useState([]);
   const [copiedVisible, setCopiedVisible] = useState(false);
   const copiedTimerRef = useRef(null);
+
+  const { isSignedIn, user } = useUser();
+
+  // Load favorites (Cloud if signed in, LocalStorage if guest)
+  useEffect(() => {
+    if (!isSignedIn) {
+      setFavoritesState(getFavorites());
+      return;
+    }
+    async function fetchCloudFavorites() {
+      const { data, error } = await supabase
+        .from("user_favorites")
+        .select("font_id")
+        .eq("user_id", user.id);
+      
+      if (!error && data) {
+        const ids = data.map(d => d.font_id);
+        setFavoritesState(ids);
+        setFavorites(ids); // update local cache
+      }
+    }
+    fetchCloudFavorites();
+  }, [isSignedIn, user]);
 
   // Global preview state from PreviewBar
   const [previewState, setPreviewState] = useState({
@@ -374,16 +399,26 @@ export default function FontLibrary({ onSelectFont }) {
     copiedTimerRef.current = setTimeout(() => setCopiedVisible(false), 1500);
   }, []);
 
-  // Toggle favorite
+  // Toggle favorite (Sync to cloud if logged in)
   const handleToggleFavorite = useCallback((fontId) => {
     setFavoritesState((prev) => {
-      const next = prev.includes(fontId)
+      const isFav = prev.includes(fontId);
+      const next = isFav
         ? prev.filter((id) => id !== fontId)
         : [...prev, fontId];
-      setFavorites(next);
+      
+      setFavorites(next); // Sync to local storage / dispatch event
+      
+      if (isSignedIn && user) {
+        if (isFav) {
+          supabase.from("user_favorites").delete().match({ user_id: user.id, font_id: fontId }).then();
+        } else {
+          supabase.from("user_favorites").insert({ user_id: user.id, font_id: fontId }).then();
+        }
+      }
       return next;
     });
-  }, []);
+  }, [isSignedIn, user]);
 
   // Filter + sort
   const filtered = FONTS
