@@ -179,7 +179,7 @@ export default function FontModal({ font, open, onClose }) {
 
               <Tabs.Root defaultValue="preview">
                 <Tabs.List className="tabs-list">
-                  {["preview", "css", "pairings", "stress"].map((tab) => (
+                  {["preview", "glyphs", "css", "pairings", "stress", "license"].map((tab) => (
                     <Tabs.Trigger key={tab} value={tab} className="tabs-trigger">
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </Tabs.Trigger>
@@ -348,6 +348,65 @@ export default function FontModal({ font, open, onClose }) {
                     </div>
                   </div>
                 </Tabs.Content>
+
+                {/* Glyphs Tab */}
+                <Tabs.Content value="glyphs">
+                  <div className="grid grid-cols-6 md:grid-cols-10 gap-2 mt-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?".split("").map((char, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-center p-3 border transition-colors"
+                        style={{
+                          borderColor: "rgba(244,239,230,0.06)",
+                          fontFamily: `'${font.family}', serif`,
+                          fontSize: "28px",
+                          color: "#F4EFE6",
+                          background: "#080808"
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C9A355"; e.currentTarget.style.color = "#C9A355"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(244,239,230,0.06)"; e.currentTarget.style.color = "#F4EFE6"; }}
+                      >
+                        {char}
+                      </div>
+                    ))}
+                  </div>
+                </Tabs.Content>
+
+                {/* License Tab */}
+                <Tabs.Content value="license">
+                  <div className="mt-4 p-6 border custom-scrollbar max-h-[400px] overflow-y-auto" style={{ borderColor: "rgba(244,239,230,0.1)", background: "#080808" }}>
+                    {font.foundry ? (
+                      <div>
+                        <h4 className="text-xl font-bold mb-4 text-[#C9A355]" style={{ fontFamily: "'Anton', sans-serif", letterSpacing: "0.05em" }}>Foundry Premium License</h4>
+                        <p className="text-[#D4CFC8] mb-4 text-sm leading-relaxed font-sans">
+                          This typeface is an exclusive Foundry property. To use this font in commercial projects, you must purchase a valid license tier from the library grid.
+                        </p>
+                        <ul className="list-disc pl-5 text-[#8A8078] text-sm mb-6 space-y-2">
+                          <li><strong className="text-[#D4CFC8]">Desktop:</strong> For static imagery, logos, and print.</li>
+                          <li><strong className="text-[#D4CFC8]">Web:</strong> For website embedding using @font-face.</li>
+                          <li><strong className="text-[#D4CFC8]">App:</strong> For software and mobile applications.</li>
+                        </ul>
+                        <p className="text-xs text-[#8A8078] font-mono italic">
+                          Reproduction, redistribution, or modification of the underlying font software without explicit permission is strictly prohibited.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <h4 className="text-xl font-bold mb-4 text-[#F4EFE6]" style={{ fontFamily: "'Anton', sans-serif", letterSpacing: "0.05em" }}>SIL Open Font License (OFL)</h4>
+                        <p className="text-[#D4CFC8] mb-4 text-sm leading-relaxed font-sans">
+                          This typeface is open-source and free for both personal and commercial use. 
+                        </p>
+                        <p className="text-[#8A8078] mb-4 text-sm leading-relaxed font-sans">
+                          You can freely use it in your products & projects - print or digital, commercial or otherwise. However, you can't sell the fonts on their own. This isn't legal advice, please consider consulting a lawyer and see the full license for all details.
+                        </p>
+                        <a href={`https://fonts.google.com/specimen/${font.family.replace(/ /g, "+")}`} target="_blank" rel="noreferrer" className="inline-block mt-2 px-4 py-2 border border-white/20 text-[#D4CFC8] text-[9px] font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors rounded-sm">
+                          Download Font
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </Tabs.Content>
+
 
                 {/* CSS Tab */}
                 <Tabs.Content value="css">

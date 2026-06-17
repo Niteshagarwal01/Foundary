@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { supabase } from "../lib/supabaseClient";
 import { FONTS } from "../data/fonts";
+import FontModal from "../components/FontModal";
 
 // ─── Reusable 3D Tilt Card ────────────────────────────────────────────────────
 function TiltCard({ children, className = "", style = {}, onClick }) {
@@ -112,6 +113,7 @@ export default function Dashboard() {
   const { session, user, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedFont, setSelectedFont] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [licenses, setLicenses] = useState([]);
@@ -346,13 +348,20 @@ export default function Dashboard() {
               className="max-w-6xl mx-auto origin-top"
             >
               {activeTab === "overview" && <OverviewTab firstName={firstName} libraryFonts={libraryFonts} licensesCount={licenses.length} />}
-              {activeTab === "library" && <LibraryTab libraryFonts={libraryFonts} loading={loadingFavorites} />}
+              {activeTab === "library" && <LibraryTab libraryFonts={libraryFonts} loading={loadingFavorites} onSelectFont={setSelectedFont} />}
               {activeTab === "licenses" && <LicensesTab licenses={licenses} />}
               {activeTab === "settings" && <SettingsTab user={user} profile={profile} />}
             </motion.div>
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Vault Font Modal */}
+      <FontModal
+        font={selectedFont}
+        open={!!selectedFont}
+        onClose={() => setSelectedFont(null)}
+      />
     </div>
   );
 }
@@ -469,7 +478,7 @@ function OverviewTab({ firstName, libraryFonts, licensesCount }) {
   );
 }
 
-function LibraryTab({ libraryFonts, loading }) {
+function LibraryTab({ libraryFonts, loading, onSelectFont }) {
   const [toastMsg, setToastMsg] = useState("");
 
   const handleCopy = (fontFamily) => {
@@ -541,7 +550,10 @@ function LibraryTab({ libraryFonts, loading }) {
         >
           {libraryFonts.map((font, i) => (
             <motion.div key={i} variants={{ hidden: { opacity: 0, y: 30, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" } } }}>
-              <TiltCard className="bg-gradient-to-br from-[#111] to-[#0A0A0A] border border-white/[0.06] rounded-2xl p-8 flex flex-col justify-between h-72 overflow-hidden hover:border-[#C9A355]/30 relative shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)]">
+              <TiltCard 
+                onClick={() => onSelectFont(font)}
+                className="bg-gradient-to-br from-[#111] to-[#0A0A0A] border border-white/[0.06] rounded-2xl p-8 flex flex-col justify-between h-72 overflow-hidden hover:border-[#C9A355]/30 relative shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)] cursor-pointer"
+              >
                 
                 {/* Subtle Floating Particles inside Card */}
                 <div className="absolute inset-0 pointer-events-none opacity-20">
