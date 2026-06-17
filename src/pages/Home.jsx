@@ -4,7 +4,6 @@ import { ThemeProvider } from "../context/ThemeContext";
 import { PreviewProvider } from "../context/AppContext";
 
 // Core
-import Cursor        from "../components/Cursor";
 import Navbar        from "../components/Navbar";
 import Hero          from "../components/Hero";
 import Marquee       from "../components/Marquee";
@@ -58,9 +57,6 @@ export default function Home() {
         <SmoothScroll>
           {/* Grain overlay */}
           <div className="grain-overlay" />
-
-          {/* Custom cursor */}
-          <Cursor />
 
           {/* Nav */}
           <Navbar activeSection={activeSection} />
