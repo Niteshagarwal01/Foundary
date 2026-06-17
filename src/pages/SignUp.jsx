@@ -69,7 +69,7 @@ export default function SignUpPage() {
     try {
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
+        redirectUrl: `${window.location.origin}/sso-callback`,
         redirectUrlComplete: "/"
       });
     } catch (err) {
