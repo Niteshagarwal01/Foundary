@@ -113,14 +113,14 @@ export default function SignInPage() {
           {/* Back button */}
           <Link
             to="/"
-            className="absolute top-12 left-6 md:left-12 flex items-center gap-2 group z-20"
+            className="absolute top-12 left-6 md:top-16 md:left-12 flex items-center gap-3 group z-20"
           >
-            <div className="w-8 h-8 border border-[#C9A355]/30 flex items-center justify-center group-hover:border-[#C9A355] group-hover:shadow-[0_0_12px_rgba(201,163,85,0.3)] transition-all duration-300">
-              <svg className="w-3.5 h-3.5 text-[#C9A355] transition-transform duration-300 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 border border-[#C9A355]/40 flex items-center justify-center group-hover:border-[#C9A355] bg-[#C9A355]/5 backdrop-blur-sm shadow-[0_0_15px_rgba(201,163,85,0.15)] group-hover:shadow-[0_0_20px_rgba(201,163,85,0.4)] transition-all duration-300">
+              <svg className="w-4 h-4 text-[#C9A355] transition-transform duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </div>
-            <span className="text-[#6B6560] text-[10px] tracking-[0.2em] uppercase font-semibold group-hover:text-[#C9A355] transition-colors duration-300">
+            <span className="text-[#F4EFE6] md:text-[#C9A355] text-[11px] md:text-xs tracking-[0.25em] uppercase font-bold group-hover:text-[#F4EFE6] transition-colors duration-300">
               The Foundry
             </span>
           </Link>
@@ -141,7 +141,7 @@ export default function SignInPage() {
             F
           </div>
 
-          <div className="relative z-10 w-full md:max-w-lg md:mx-auto md:flex md:flex-col md:items-center">
+          <div className="relative z-10 w-full md:max-w-xl md:mx-auto md:flex md:flex-col md:items-center">
             {/* Thin gold rule */}
             <motion.div
               initial={{ scaleX: 0 }}
@@ -155,8 +155,8 @@ export default function SignInPage() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[#F4EFE6] uppercase tracking-tighter leading-[0.85] mb-3"
-              style={{ fontFamily: "'Anton', sans-serif", fontSize: "clamp(3.2rem, 16vw, 5.5rem)" }}
+              className="text-[#F4EFE6] uppercase tracking-tighter leading-[0.85] mb-3 md:mb-5"
+              style={{ fontFamily: "'Anton', sans-serif", fontSize: "clamp(3.2rem, 16vw, 6.5rem)" }}
             >
               Enter
             </motion.h1>
@@ -166,7 +166,7 @@ export default function SignInPage() {
               transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 fontFamily: "'Kaushan Script', cursive",
-                fontSize: "clamp(2.8rem, 14vw, 4.8rem)",
+                fontSize: "clamp(2.8rem, 14vw, 5.5rem)",
                 color: "#C9A355",
                 lineHeight: 1,
               }}
@@ -177,7 +177,7 @@ export default function SignInPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-4 text-sm leading-relaxed max-w-[260px] md:max-w-sm"
+              className="mt-4 md:mt-6 text-sm md:text-lg leading-relaxed max-w-[260px] md:max-w-md"
               style={{ fontFamily: "'Lora', serif", fontStyle: "italic", color: "#6B6560" }}
             >
               Access your curated typefaces and exclusive releases.
@@ -198,7 +198,7 @@ export default function SignInPage() {
           {/* Divider line */}
           <div className="w-full h-[1px] mb-0 md:hidden" style={{ background: "linear-gradient(90deg, transparent, rgba(201,163,85,0.15) 50%, transparent)" }} />
 
-          <div className="px-6 pt-8 pb-12 md:max-w-md md:mx-auto md:bg-[#0A0A0A]/60 md:backdrop-blur-2xl md:border md:border-white/[0.05] md:shadow-[0_0_80px_rgba(0,0,0,0.5)] md:p-10 md:mt-6 md:rounded-2xl md:relative md:z-20">
+          <div className="px-6 pt-8 pb-12 md:max-w-2xl md:mx-auto md:bg-[#0A0A0A]/60 md:backdrop-blur-2xl md:border md:border-white/[0.05] md:shadow-[0_0_80px_rgba(0,0,0,0.5)] md:p-14 md:mt-8 md:rounded-2xl md:relative md:z-20">
             <div className="mb-8">
               <h2 className="font-display text-[#F4EFE6] text-2xl tracking-[0.3em] uppercase mb-1">Sign In</h2>
               <p className="font-sans text-[#4A4540] text-[10px] uppercase tracking-[0.2em]">Authenticate to continue</p>
