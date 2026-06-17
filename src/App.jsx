@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthenticateWithRedirectCallback, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
+import { AuthenticateWithRedirectCallback, SignedIn, SignedOut } from "@clerk/clerk-react";
 import Home from "./pages/Home";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
@@ -16,7 +16,15 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/sign-in/*" element={<SignInPage />} />
         <Route path="/sign-up/*" element={<SignUpPage />} />
-        <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback signUpUrl="/sign-up" />} />
+        <Route 
+          path="/sso-callback" 
+          element={
+            <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-[#C9A355] border-t-transparent rounded-full animate-spin" />
+              <AuthenticateWithRedirectCallback signUpUrl="/sign-up" />
+            </div>
+          } 
+        />
         
         {/* Protected Dashboard Route */}
         <Route 
@@ -27,7 +35,7 @@ export default function App() {
                 <Dashboard />
               </SignedIn>
               <SignedOut>
-                <RedirectToSignIn />
+                <Navigate to="/sign-in" replace />
               </SignedOut>
             </>
           } 
