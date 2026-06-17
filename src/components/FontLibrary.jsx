@@ -332,16 +332,33 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
             isFavorited={isFavorited}
             onToggle={onToggleFavorite}
           />
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setCartFont(font);
-              setCartOpen(true);
-            }}
-            className="h-6 px-3 flex items-center justify-center border border-[#C9A355]/30 text-[#C9A355] text-[9px] font-bold uppercase tracking-widest hover:bg-[#C9A355] hover:text-[#0C0C0C] transition-colors rounded-sm"
-          >
-            Buy
-          </button>
+          {font.foundry ? (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setCartFont(font);
+                setCartOpen(true);
+              }}
+              className="h-6 px-3 flex items-center justify-center border border-[#C9A355]/30 text-[#C9A355] text-[9px] font-bold uppercase tracking-widest hover:bg-[#C9A355] hover:text-[#0C0C0C] transition-colors rounded-sm"
+            >
+              Buy
+            </button>
+          ) : (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                // Simulate download
+                const link = document.createElement("a");
+                link.href = `https://fonts.google.com/specimen/${font.family.replace(/ /g, "+")}`;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.click();
+              }}
+              className="h-6 px-3 flex items-center justify-center border border-white/20 text-[#D4CFC8] text-[9px] font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors rounded-sm"
+            >
+              Download
+            </button>
+          )}
         </div>
         <motion.span
           onClick={() => onSelect(font)}
