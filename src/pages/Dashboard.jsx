@@ -532,7 +532,7 @@ function LibraryTab({ libraryFonts, loading, onSelectFont }) {
         <div className="relative inline-block w-full md:w-auto mt-2 md:mt-0">
           <h2 className="text-[3.2rem] md:text-[5rem] uppercase tracking-normal mb-2 md:mb-0 leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>MY LIBRARY</h2>
           <span 
-            className="absolute -bottom-4 right-0 md:-top-6 md:-right-8 text-[2.5rem] md:text-3xl text-[#C9A355] -rotate-6 transform origin-right drop-shadow-xl z-10"
+            className="absolute -top-3 right-2 md:-top-6 md:-right-8 text-[2.2rem] md:text-3xl text-[#C9A355] -rotate-6 transform origin-right drop-shadow-xl z-10"
             style={{ fontFamily: "'Kaushan Script', cursive", fontStyle: "italic" }}
           >
             collection

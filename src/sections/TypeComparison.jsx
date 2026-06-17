@@ -47,17 +47,24 @@ export default function TypeComparison() {
     loadGFont(pair.b.family);
   }, [pair]);
 
+  const handleMove = useCallback((clientX) => {
+    if (!dragging || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    setSplitPos(Math.max(10, Math.min(90, x)));
+  }, [dragging]);
+
   const onMouseDown = useCallback((e) => {
     e.preventDefault();
     setDragging(true);
   }, []);
 
-  const onMouseMove = useCallback((e) => {
-    if (!dragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    setSplitPos(Math.max(10, Math.min(90, x)));
-  }, [dragging]);
+  const onTouchStart = useCallback(() => {
+    setDragging(true);
+  }, []);
+
+  const onMouseMove = useCallback((e) => handleMove(e.clientX), [handleMove]);
+  const onTouchMove = useCallback((e) => handleMove(e.touches[0].clientX), [handleMove]);
 
   const onMouseUp = useCallback(() => setDragging(false), []);
 
@@ -69,7 +76,11 @@ export default function TypeComparison() {
       id="compare"
       style={{ background: "#080808", padding: "60px 0", position: "relative", overflow: "hidden" }}
       onMouseMove={onMouseMove}
+      onTouchMove={onTouchMove}
       onMouseUp={onMouseUp}
+      onTouchEnd={onMouseUp}
+      onMouseLeave={onMouseUp}
+      onTouchCancel={onMouseUp}
     >
       {/* Ambient glow */}
       <div style={{
@@ -213,8 +224,9 @@ export default function TypeComparison() {
             {/* Drag handle */}
             <div
               className="absolute top-0 bottom-0 flex items-center justify-center"
-              style={{ left: `${splitPos}%`, transform: "translateX(-50%)", zIndex: 10, cursor: "col-resize" }}
+              style={{ left: `${splitPos}%`, transform: "translateX(-50%)", zIndex: 10, cursor: "col-resize", touchAction: "none" }}
               onMouseDown={onMouseDown}
+              onTouchStart={onTouchStart}
             >
               {/* Line */}
               <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", top: 0, bottom: 0, width: "2px", background: "#C9A355", boxShadow: "0 0 12px rgba(201,163,85,0.6)" }} />
