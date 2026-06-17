@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth, AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
+import ExplorePage from "./pages/Explore";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
@@ -31,6 +32,7 @@ export default function App() {
           
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/explore" element={<ExplorePage />} />
             <Route path="/sign-in/*" element={<SignInPage />} />
             <Route path="/sign-up/*" element={<SignUpPage />} />
 

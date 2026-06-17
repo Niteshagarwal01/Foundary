@@ -103,9 +103,12 @@ export default function Home() {
           </FlipPage>
 
           {/* 8. Font Library Grid */}
-          <FlipPage>
-            <FontLibrary onSelectFont={setSelectedFont} />
-          </FlipPage>
+          <section id="library" className="px-8 md:px-16 pt-32 pb-40 relative">
+            <h2 className="text-4xl md:text-6xl font-display text-[#F4EFE6] mb-16" style={{ fontStyle: "italic", fontWeight: 700 }}>
+              The Archives
+            </h2>
+            <FontLibrary onSelectFont={setSelectedFont} previewMode={true} />
+          </section>
 
           {/* 9. Typeface Timeline */}
           <TypeTimeline />

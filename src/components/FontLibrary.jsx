@@ -357,8 +357,8 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
   );
 }
 
-// ─── Main FontLibrary ─────────────────────────────────────────────────────────
-export default function FontLibrary({ onSelectFont }) {
+// ─── Font Library Grid ────────────────────────────────────────────────────────
+export default function FontLibrary({ onSelectFont, previewMode = false }) {
   const [query,    setQuery]    = useState("");
   const [category, setCategory] = useState("All");
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
@@ -456,26 +456,29 @@ export default function FontLibrary({ onSelectFont }) {
     );
 
   const total   = filtered.length;
-  const visible = filtered.slice(0, visibleCount);
+  // If previewMode, hard cap at 36 fonts maximum
+  const maxAllowed = previewMode ? 36 : total;
+  const visible = filtered.slice(0, Math.min(visibleCount, maxAllowed));
 
   useEffect(() => { setVisibleCount(INITIAL_COUNT); }, [query, category]);
 
   // Infinite Scroll Observer
   const loaderRef = useRef(null);
   useEffect(() => {
+    if (previewMode) return; // Disable infinite scroll in preview mode after initial load
     const el = loaderRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && visibleCount < total) {
-          setVisibleCount(c => Math.min(c + LOAD_MORE_COUNT, total));
+        if (entry.isIntersecting && visibleCount < maxAllowed) {
+          setVisibleCount(c => Math.min(c + LOAD_MORE_COUNT, maxAllowed));
         }
       },
       { rootMargin: "200px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [visibleCount, total]);
+  }, [visibleCount, maxAllowed, previewMode]);
 
   return (
     <section id="library" style={{ background: "#080808", paddingBottom: "100px", position: "relative", overflow: "hidden" }}>
@@ -681,20 +684,34 @@ export default function FontLibrary({ onSelectFont }) {
       </div>
 
       {/* Infinite Scroll Sentinel */}
-      {visibleCount < total && (
+      {!previewMode && visibleCount < total && (
         <div ref={loaderRef} className="h-20 w-full flex items-center justify-center mt-8">
           <div className="w-8 h-8 border-2 border-[#C9A355] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
-      {/* Stats */}
-      <div className="text-center mt-12 mb-8 px-6 text-[#6B6560] text-[10px] tracking-widest uppercase flex items-center justify-center gap-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-        <div className="h-px bg-white/[0.04] flex-1 max-w-[100px]" />
-        <span>
-          {total === 0 ? "0 results" : `Showing 1–${Math.min(visibleCount, total)} of ${total} Typefaces`}
-        </span>
-        <div className="h-px bg-white/[0.04] flex-1 max-w-[100px]" />
-      </div>
+      {/* Explore Button / Stats */}
+      {previewMode ? (
+        <div className="flex justify-center mt-16 mb-8 px-6">
+          <a
+            href="/explore"
+            className="group relative px-8 py-4 bg-[#0A0A0A] border border-[#C9A355]/30 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-[#C9A355]/5 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[0.16,1,0.3,1]" />
+            <span className="relative z-10 font-sans text-xs uppercase tracking-[0.2em] font-semibold text-[#F4EFE6] group-hover:text-[#C9A355] transition-colors duration-300">
+              Explore Full Library
+            </span>
+          </a>
+        </div>
+      ) : (
+        <div className="text-center mt-12 mb-8 px-6 text-[#6B6560] text-[10px] tracking-widest uppercase flex items-center justify-center gap-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <div className="h-px bg-white/[0.04] flex-1 max-w-[100px]" />
+          <span>
+            {total === 0 ? "0 results" : `Showing 1–${Math.min(visibleCount, total)} of ${total} Typefaces`}
+          </span>
+          <div className="h-px bg-white/[0.04] flex-1 max-w-[100px]" />
+        </div>
+      )}
 
     </section>
   );
