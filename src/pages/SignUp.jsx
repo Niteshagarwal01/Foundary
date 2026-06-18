@@ -50,7 +50,7 @@ export default function SignUpPage() {
       // If auto-confirm is enabled in Supabase, they log in immediately
       // If email verification is required, they need to check their email
       if (data?.session) {
-        navigate("/dashboard");
+        navigate("/vault");
       } else {
         setError("Please check your email to verify your account.");
         setLoading(false);
@@ -63,7 +63,7 @@ export default function SignUpPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/vault`
         }
       });
       if (error) throw error;

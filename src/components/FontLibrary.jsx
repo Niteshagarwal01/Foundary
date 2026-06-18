@@ -225,7 +225,7 @@ function HeartButton({ fontId, isFavorited, onToggle }) {
 }
 
 // ─── Font Card ────────────────────────────────────────────────────────────────
-function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, previewState }) {
+const FontCard = React.memo(function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, previewState }) {
   const [hov, setHov] = useState(false);
   const ref = useIntersectionFont(font.family, font.weights);
   const { setCartOpen, setCartFont } = useCart();
@@ -372,7 +372,7 @@ function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, pre
       </div>
     </motion.div>
   );
-}
+});
 
 // ─── Font Library Grid ────────────────────────────────────────────────────────
 const FontLibrary = React.memo(function FontLibrary({ onSelectFont, previewMode = false }) {

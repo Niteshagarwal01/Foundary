@@ -8,8 +8,8 @@ export default function Checkout() {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const [font, setFont] = useState(null);
-  const [tier, setTier] = useState(null);
+  const [font, setFont] = useState(location.state?.font || null);
+  const [tier, setTier] = useState(location.state?.tier || null);
   
   const [formData, setFormData] = useState({
     firstName: user?.user_metadata?.first_name || "",
@@ -23,16 +23,13 @@ export default function Checkout() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!location.state?.font || !location.state?.tier) {
+    if (!font || !tier) {
       navigate("/explore");
-    } else {
-      setFont(location.state.font);
-      setTier(location.state.tier);
     }
     if (!user) {
       navigate("/sign-in");
     }
-  }, [location, navigate, user]);
+  }, [font, tier, navigate, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -101,7 +98,7 @@ export default function Checkout() {
             if (dbError) throw dbError;
 
             // Success! Redirect to Dashboard
-            navigate("/dashboard");
+            navigate("/vault");
 
           } catch (err) {
             console.error("Verification error:", err);

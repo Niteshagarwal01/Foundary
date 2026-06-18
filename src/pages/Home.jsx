@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "../context/ThemeContext";
 import { PreviewProvider } from "../context/AppContext";
@@ -30,6 +31,16 @@ import { FONT_COUNT } from "../data/fonts";
 export default function Home() {
   const [selectedFont, setSelectedFont] = useState(null);
   const [activeSection, setActiveSection] = useState("hero");
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [location.hash]);
 
   // Track which section is in view
   useEffect(() => {

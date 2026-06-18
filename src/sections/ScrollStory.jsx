@@ -204,13 +204,14 @@ export default function ScrollStory() {
     offset: ["start start", "end end"],
   });
 
-  // Count words per line for line separators
-  let wordOffset = 0;
-  const lineData = STORY_LINES.map((line) => {
-    const start = wordOffset;
-    wordOffset += line.length;
-    return { start, end: wordOffset, line };
-  });
+  const lineData = STORY_LINES.reduce((acc, line) => {
+    const start = acc.length > 0 ? acc[acc.length - 1].end : 0;
+    const end = start + line.length;
+    acc.push({ start, end, line });
+    return acc;
+  }, []);
+
+  const lastLineOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
 
   return (
     <section
@@ -351,11 +352,7 @@ export default function ScrollStory() {
                       display: "flex",
                       justifyContent: "center",
                       marginTop: 24,
-                      opacity: useTransform(
-                        scrollYProgress,
-                        [0.85, 0.95],
-                        [0, 1]
-                      ),
+                      opacity: lastLineOpacity,
                     }}
                   >
                     <div

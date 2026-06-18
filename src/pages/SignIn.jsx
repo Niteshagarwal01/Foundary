@@ -38,7 +38,7 @@ export default function SignInPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate("/dashboard");
+      navigate("/vault");
     }
   };
 
@@ -47,7 +47,7 @@ export default function SignInPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/vault`
         }
       });
       if (error) throw error;

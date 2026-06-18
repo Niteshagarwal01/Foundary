@@ -72,18 +72,17 @@ function TiltCard({ children, className = "", style = {}, onClick }) {
 
 // ─── Number CountUp ────────────────────────────────────────────────────────
 function CountUp({ to, duration = 2 }) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(() => {
+    if (to === "∞") return "∞";
+    if (isNaN(parseInt(to, 10))) return to;
+    return 0;
+  });
   
   useEffect(() => {
-    if (to === "∞") {
-      setCount("∞");
+    if (to === "∞" || isNaN(parseInt(to, 10))) {
       return;
     }
     const target = parseInt(to, 10);
-    if (isNaN(target)) {
-      setCount(to);
-      return;
-    }
     
     let startTime;
     let animationFrame;

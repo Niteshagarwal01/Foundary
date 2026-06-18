@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
@@ -81,7 +81,14 @@ export default function Navbar({ activeSection }) {
     return () => window.removeEventListener("foundry:favorites-update", handler);
   }, []);
 
+  const location = useLocation();
+
   const scrollTo = (id) => {
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      setMobileMenuOpen(false);
+      return;
+    }
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMobileMenuOpen(false);
   };
@@ -249,7 +256,7 @@ export default function Navbar({ activeSection }) {
 
           {isSignedIn ? (
             <div className="hidden sm:flex items-center gap-4 relative" ref={dropdownRef}>
-              <Link to="/dashboard">
+              <Link to="/vault">
                 <motion.button
                   className="shimmer-border px-4 py-2 text-xs font-bold tracking-[0.2em] uppercase"
                   style={{
@@ -297,7 +304,7 @@ export default function Navbar({ activeSection }) {
                       <p className="text-[#6B6560] text-xs truncate mt-0.5">{user?.email}</p>
                     </div>
                     <Link 
-                      to="/dashboard" 
+                      to="/vault" 
                       onClick={() => setDropdownOpen(false)}
                       className="px-4 py-2.5 text-xs text-[#A09890] hover:text-[#C9A355] hover:bg-white/5 transition-colors flex items-center gap-2 uppercase tracking-widest font-semibold"
                     >
@@ -436,7 +443,7 @@ export default function Navbar({ activeSection }) {
                   <button 
                     onClick={() => {
                       setMobileMenuOpen(false);
-                      navigate("/dashboard");
+                      navigate("/vault");
                     }} 
                     className="w-full flex items-center justify-center gap-3 bg-[#C9A355] hover:bg-[#F0D48A] text-[#080808] transition-colors py-4 text-xs font-bold tracking-widest uppercase"
                   >
