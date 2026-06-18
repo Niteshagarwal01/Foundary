@@ -1,7 +1,7 @@
 import { FOUNDRY_FONTS } from "../data/fonts";
 
 const API_KEY = import.meta.env.VITE_GROQ_API_KEY || "";
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const API_URL = "/api/groq/chat/completions";
 
 // A lightweight mapping of our best fonts to provide context to the LLM
 const FONT_CONTEXT = FOUNDRY_FONTS.map(f => `${f.name} (ID: ${f.id}) - Tags: ${f.tags?.join(", ")} - Vibes: ${f.specimen}`).join("\n");
