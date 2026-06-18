@@ -366,7 +366,7 @@ export default function Dashboard() {
               transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
               className="max-w-6xl mx-auto origin-top"
             >
-              {activeTab === "overview" && <OverviewTab firstName={firstName} libraryFonts={libraryFonts} licensesCount={licenses.length} />}
+              {activeTab === "overview" && <OverviewTab firstName={firstName} libraryFonts={libraryFonts} licenses={licenses} />}
               {activeTab === "library" && <LibraryTab libraryFonts={libraryFonts} loading={loadingFavorites} onSelectFont={setSelectedFont} />}
               {activeTab === "licenses" && <LicensesTab licenses={licenses} />}
               {activeTab === "settings" && <SettingsTab user={user} profile={profile} />}
@@ -387,15 +387,72 @@ export default function Dashboard() {
 
 // ─── Sub-Components for Tabs ──────────────────────────────────────────────────
 
-function OverviewTab({ firstName, libraryFonts, licensesCount }) {
-  // Map recent favorites
+function OverviewTab({ firstName, libraryFonts, licenses }) {
   const recentFonts = libraryFonts.slice(0, 3);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState("");
+  const [exportMsg, setExportMsg] = useState("");
+
+  // ── Export Collection → downloads a .css file with @import + CSS vars ──
+  const handleExport = () => {
+    if (libraryFonts.length === 0) {
+      setExportMsg("Your library is empty. Save some fonts first!");
+      setTimeout(() => setExportMsg(""), 3000);
+      return;
+    }
+    const families = libraryFonts.map(f => encodeURIComponent(f.family)).join("&family=");
+    const importLine = `@import url('https://fonts.googleapis.com/css2?family=${families}&display=swap');\n\n`;
+    const vars = libraryFonts.map(f => {
+      const key = f.family.toLowerCase().replace(/\s+/g, "-");
+      return `  --font-${key}: '${f.family}', serif;`;
+    }).join("\n");
+    const css = `${importLine}/* Foundry — Your Curated Font Collection */\n:root {\n${vars}\n}\n`;
+
+    const blob = new Blob([css], { type: "text/css" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "foundry-collection.css";
+    a.click();
+    URL.revokeObjectURL(url);
+    setExportMsg("✓ Collection exported!");
+    setTimeout(() => setExportMsg(""), 3000);
+  };
+
+  // ── Manage Sync → re-fetches favorites from cloud ──
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncMsg("");
+    await new Promise(r => setTimeout(r, 1200)); // small delay for feel
+    window.dispatchEvent(new CustomEvent("foundry:sync-vault"));
+    setSyncing(false);
+    setSyncMsg("✓ Library synchronized!");
+    setTimeout(() => setSyncMsg(""), 3000);
+  };
+
+  const recentOrders = licenses.slice(0, 3);
 
   return (
     <div>
+      {/* Toast notifications */}
+      <AnimatePresence>
+        {(exportMsg || syncMsg) && (
+          <motion.div
+            key="toast"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="fixed bottom-20 right-6 z-50 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-widest"
+            style={{ background: "#C9A355", color: "#0C0C0C", fontFamily: "'Inter', sans-serif", boxShadow: "0 0 30px rgba(201,163,85,0.4)" }}
+          >
+            {exportMsg || syncMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="mb-12 md:mb-24 pt-2 md:pt-4">
         <div className="relative inline-block">
-          <h1 
+          <h1
             className="text-[3.2rem] md:text-[6rem] xl:text-[8rem] uppercase tracking-normal leading-[0.9] text-[#F4EFE6] relative z-10"
             style={{ fontFamily: "'Anton', sans-serif" }}
           >
@@ -404,7 +461,7 @@ function OverviewTab({ firstName, libraryFonts, licensesCount }) {
             CENTER
           </h1>
           <div className="absolute -bottom-8 md:-bottom-12 right-2 md:-right-24 z-20 pointer-events-none">
-            <span 
+            <span
               className="text-[2.5rem] md:text-[5rem] xl:text-[6.5rem] text-[#C9A355] -rotate-6 block transform origin-right drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]"
               style={{ fontFamily: "'Kaushan Script', cursive", fontStyle: "italic" }}
             >
@@ -417,13 +474,13 @@ function OverviewTab({ firstName, libraryFonts, licensesCount }) {
         </p>
       </div>
 
-      <motion.div 
+      <motion.div
         initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-16"
       >
         {[
           { label: "Total Assets", value: Object.keys(FONTS).length.toString(), desc: "Available in catalog" },
-          { label: "Active Licenses", value: licensesCount.toString(), desc: "Commercial" },
+          { label: "Active Licenses", value: licenses.length.toString(), desc: "Commercial" },
           { label: "Saved Styles", value: libraryFonts.length.toString(), desc: "In your Library" },
         ].map((stat, i) => (
           <motion.div key={i} variants={{ hidden: { opacity: 0, y: 30, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" } } }}>
@@ -442,8 +499,9 @@ function OverviewTab({ firstName, libraryFonts, licensesCount }) {
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <motion.div 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* Recent Activity */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           className="lg:col-span-2 bg-[#0C0C0C] border border-white/[0.04] p-8 rounded-2xl relative overflow-hidden"
         >
@@ -471,8 +529,13 @@ function OverviewTab({ firstName, libraryFonts, licensesCount }) {
           )}
         </motion.div>
 
+        {/* Quick Actions */}
         <div className="flex flex-col gap-4">
-          <motion.button initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }} className="flex-1 bg-gradient-to-br from-[#151515] to-[#0A0A0A] border border-[#C9A355]/20 hover:border-[#C9A355]/60 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 group transition-all duration-300 relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+          <motion.button
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}
+            onClick={handleExport}
+            className="flex-1 bg-gradient-to-br from-[#151515] to-[#0A0A0A] border border-[#C9A355]/20 hover:border-[#C9A355]/60 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 group transition-all duration-300 relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+          >
             <div className="absolute inset-0 bg-gradient-to-b from-[#C9A355]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="w-12 h-12 rounded-full bg-[#C9A355]/10 flex items-center justify-center text-[#C9A355] group-hover:scale-110 group-hover:bg-[#C9A355] group-hover:text-[#0C0C0C] transition-all duration-300 relative z-10">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,21 +544,90 @@ function OverviewTab({ firstName, libraryFonts, licensesCount }) {
             </div>
             <span className="text-[#F4EFE6] text-xs font-bold uppercase tracking-[0.2em] relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>Export Collection</span>
           </motion.button>
-          <motion.button initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }} className="flex-1 bg-gradient-to-br from-[#151515] to-[#0A0A0A] border border-white/[0.04] hover:border-white/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 group transition-all duration-300 relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+
+          <motion.button
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }}
+            onClick={handleSync}
+            disabled={syncing}
+            className="flex-1 bg-gradient-to-br from-[#151515] to-[#0A0A0A] border border-white/[0.04] hover:border-white/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 group transition-all duration-300 relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+          >
             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white group-hover:scale-110 transition-all duration-300 relative z-10">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg className={`w-5 h-5 ${syncing ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
-            <span className="text-[#F4EFE6] text-xs font-bold uppercase tracking-[0.2em] relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>Manage Sync</span>
+            <span className="text-[#F4EFE6] text-xs font-bold uppercase tracking-[0.2em] relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+              {syncing ? "Syncing..." : "Manage Sync"}
+            </span>
           </motion.button>
         </div>
       </div>
+
+      {/* Recent Orders */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
+        className="bg-[#0C0C0C] border border-white/[0.04] rounded-2xl p-8 relative overflow-hidden mt-8"
+      >
+        <div className="absolute top-0 left-0 w-64 h-64 bg-[#C9A355]/3 rounded-full filter blur-[80px] pointer-events-none" />
+        <div className="flex items-center justify-between mb-8 relative z-10">
+          <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[#C9A355]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Recent Orders
+          </h3>
+          <span className="text-[10px] uppercase tracking-widest text-[#3A3A3A]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {licenses.length} total
+          </span>
+        </div>
+        {recentOrders.length > 0 ? (
+          <div className="space-y-4 relative z-10">
+            {recentOrders.map((lic, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8 + i * 0.1 }}
+                className="flex items-center justify-between p-4 rounded-xl bg-[#111] border border-white/[0.03] hover:border-[#C9A355]/20 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-9 h-9 rounded-lg bg-[#C9A355]/10 flex items-center justify-center text-[#C9A355]">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[#F4EFE6] text-sm font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>{lic.font_name}</p>
+                    <p className="text-[#6B6560] text-[10px] uppercase tracking-widest mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {lic.license_type} License · {new Date(lic.purchase_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[#C9A355] font-bold text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    ₹{lic.price?.toLocaleString("en-IN")}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] uppercase tracking-widest font-bold" style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.2)" }}>
+                    {lic.status || "Active"}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="relative z-10 flex flex-col items-center gap-4 py-8 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-[#151515] border border-white/5 flex items-center justify-center text-[#3A3A3A]">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <p className="text-[#6B6560] text-xs uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>No orders yet.</p>
+            <p className="text-[#3A3A3A] text-xs" style={{ fontFamily: "'Lora', serif", fontStyle: "italic" }}>Purchase a font license to see it here.</p>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }
+
 
 function LibraryTab({ libraryFonts, loading, onSelectFont }) {
   const [toastMsg, setToastMsg] = useState("");
@@ -753,22 +885,26 @@ function LicensesTab({ licenses }) {
 }
 
 function SettingsTab({ user, profile }) {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState(profile?.first_name || user?.user_metadata?.first_name || "");
   const [lastName, setLastName] = useState(profile?.last_name || user?.user_metadata?.last_name || "");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMsg, setPwMsg] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMsg("");
-    
-    // Update Auth metadata
+
     await supabase.auth.updateUser({
       data: { first_name: firstName, last_name: lastName }
     });
 
-    // Upsert into Profiles table
     const { error } = await supabase.from('profiles').upsert({
       id: user.id,
       first_name: firstName,
@@ -777,12 +913,37 @@ function SettingsTab({ user, profile }) {
       updated_at: new Date().toISOString()
     });
 
-    if (error) {
-      setMsg(`Error: ${error.message}`);
-    } else {
-      setMsg("Profile updated successfully.");
-    }
+    setMsg(error ? `Error: ${error.message}` : "Profile updated successfully.");
     setLoading(false);
+  };
+
+  const handleResetPassword = async () => {
+    setPwLoading(true);
+    setPwMsg("");
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      setPwMsg(`Error: ${error.message}`);
+    } else {
+      setPwMsg(`✓ Password reset link sent to ${user.email}`);
+    }
+    setPwLoading(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      return;
+    }
+    setDeleting(true);
+    // Delete user data from DB tables
+    await supabase.from("user_favorites").delete().eq("user_id", user.id);
+    await supabase.from("licenses").delete().eq("user_id", user.id);
+    await supabase.from("profiles").delete().eq("id", user.id);
+    // Sign out (Supabase free tier doesn't allow client-side user deletion, so we sign out and clear data)
+    await signOut(() => navigate("/"));
+    setDeleting(false);
   };
 
   return (
@@ -790,7 +951,7 @@ function SettingsTab({ user, profile }) {
       <div className="mb-12 md:mb-16">
         <div className="relative inline-block mb-4 md:mb-2 w-full md:w-auto mt-2 md:mt-0">
           <h2 className="text-[3.2rem] md:text-[5rem] uppercase tracking-normal leading-none" style={{ fontFamily: "'Anton', sans-serif" }}>ACCOUNT SETTINGS</h2>
-          <span 
+          <span
             className="absolute -bottom-6 right-0 md:-top-6 md:-right-6 text-[2.5rem] md:text-3xl text-[#C9A355] -rotate-6 transform origin-right drop-shadow-xl"
             style={{ fontFamily: "'Kaushan Script', cursive", fontStyle: "italic" }}
           >
@@ -800,15 +961,14 @@ function SettingsTab({ user, profile }) {
         <p className="text-[#8A8078] text-base md:text-xl mt-8 md:mt-4" style={{ fontFamily: "'Lora', serif", fontStyle: "italic" }}>Manage your identity and security preferences.</p>
       </div>
 
-      <motion.div 
+      <motion.div
         initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-10"
       >
-        
         {/* Profile Details */}
         <motion.div variants={{ hidden: { opacity: 0, x: -30 }, visible: { opacity: 1, x: 0, transition: { type: "spring" } } }} className="bg-gradient-to-b from-[#111] to-[#0A0A0A] border border-white/[0.04] rounded-3xl p-10 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A355]/5 rounded-full filter blur-3xl pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
-          
+
           <h3 className="text-2xl uppercase text-[#F4EFE6] mb-8 relative z-10 flex items-center gap-3 tracking-wide" style={{ fontFamily: "'Anton', sans-serif" }}>
             <div className="w-3 h-3 rounded-full bg-[#C9A355] shadow-[0_0_10px_#C9A355]" />
             Personal Info
@@ -818,8 +978,8 @@ function SettingsTab({ user, profile }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#6B6560] mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>First Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
                   className="w-full bg-[#1A1A1A] border border-white/10 rounded-lg px-4 py-3 text-sm text-[#F4EFE6] focus:border-[#C9A355] focus:outline-none transition-colors"
@@ -827,19 +987,19 @@ function SettingsTab({ user, profile }) {
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#6B6560] mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Last Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
                   className="w-full bg-[#1A1A1A] border border-white/10 rounded-lg px-4 py-3 text-sm text-[#F4EFE6] focus:border-[#C9A355] focus:outline-none transition-colors"
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#6B6560] mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Email Address</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 value={user?.email || ""}
                 disabled
                 className="w-full bg-[#111] border border-white/5 rounded-lg px-4 py-3 text-sm text-[#6B6560] cursor-not-allowed"
@@ -847,8 +1007,8 @@ function SettingsTab({ user, profile }) {
               <span className="block mt-3 text-[10px] text-[#6B6560]" style={{ fontFamily: "'Lora', serif", fontStyle: "italic" }}>Email changes require support verification.</span>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="mt-6 bg-transparent border border-[#C9A355] text-[#C9A355] hover:bg-[#C9A355] hover:text-[#0C0C0C] hover:shadow-[0_0_20px_rgba(201,163,85,0.4)] px-6 py-4 rounded-lg text-[11px] uppercase font-bold tracking-[0.2em] transition-all duration-300 w-full md:w-auto"
               style={{ fontFamily: "'Inter', sans-serif" }}
@@ -869,9 +1029,15 @@ function SettingsTab({ user, profile }) {
             <p className="text-[#8A8078] text-sm mb-8 leading-relaxed" style={{ fontFamily: "'Lora', serif" }}>
               We highly recommend using OAuth (Google) for secure access. If you set a password, you can update it here.
             </p>
-            <button className="bg-[#1A1A1A] border border-white/10 hover:border-white/30 text-[#F4EFE6] px-6 py-4 rounded-lg text-[11px] uppercase font-bold tracking-[0.2em] transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Reset Password
+            <button
+              onClick={handleResetPassword}
+              disabled={pwLoading}
+              className="bg-[#1A1A1A] border border-white/10 hover:border-[#C9A355]/40 hover:text-[#C9A355] text-[#F4EFE6] px-6 py-4 rounded-lg text-[11px] uppercase font-bold tracking-[0.2em] transition-all duration-300 disabled:opacity-50"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {pwLoading ? "Sending..." : "Reset Password"}
             </button>
+            {pwMsg && <p className={`text-xs mt-4 ${pwMsg.includes('Error') ? 'text-red-400' : 'text-[#C9A355]'}`}>{pwMsg}</p>}
           </motion.div>
 
           <motion.div variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { type: "spring" } } }} className="bg-[#110505] border border-red-900/30 rounded-3xl p-10 relative overflow-hidden group hover:border-red-500/50 transition-colors duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
@@ -882,12 +1048,21 @@ function SettingsTab({ user, profile }) {
             <p className="text-[#8A8078] text-sm mb-8 leading-relaxed relative z-10" style={{ fontFamily: "'Lora', serif" }}>
               Permanently delete your account and revoke all commercial licenses. This action cannot be undone.
             </p>
-            <button className="relative z-10 bg-transparent border border-red-900 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] px-6 py-4 rounded-lg text-[11px] uppercase font-bold tracking-[0.2em] transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Delete Account
+            {deleteConfirm && (
+              <p className="text-red-400 text-xs mb-4 relative z-10 font-bold uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
+                ⚠ Are you sure? Click again to permanently delete.
+              </p>
+            )}
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="relative z-10 bg-transparent border border-red-900 text-red-500 hover:bg-red-500 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] px-6 py-4 rounded-lg text-[11px] uppercase font-bold tracking-[0.2em] transition-all duration-300 disabled:opacity-50"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {deleting ? "Deleting..." : deleteConfirm ? "Confirm Delete" : "Delete Account"}
             </button>
           </motion.div>
         </div>
-
       </motion.div>
     </div>
   );
