@@ -40,16 +40,55 @@ export function usePreview() {
 export const CartContext = createContext({
   cartOpen: false,
   setCartOpen: () => {},
-  cartFont: null,
-  setCartFont: () => {},
+  cartItems: [],
+  addToCart: () => {},
+  removeFromCart: () => {},
+  updateCartItemTier: () => {},
+  clearCart: () => {},
 });
 
 export function CartProvider({ children }) {
   const [cartOpen, setCartOpen] = useState(false);
-  const [cartFont, setCartFont] = useState(null);
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem("foundry-cart");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("foundry-cart", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const addToCart = (font) => {
+    setCartItems(prev => {
+      // Don't add if already in cart
+      if (prev.some(item => item.font.id === font.id)) return prev;
+      // Default to Desktop tier (index 0)
+      return [...prev, { font, tierIndex: 0 }];
+    });
+    setCartOpen(true);
+  };
+
+  const removeFromCart = (fontId) => {
+    setCartItems(prev => prev.filter(item => item.font.id !== fontId));
+  };
+
+  const updateCartItemTier = (fontId, tierIndex) => {
+    setCartItems(prev => prev.map(item => 
+      item.font.id === fontId ? { ...item, tierIndex } : item
+    ));
+  };
+
+  const clearCart = () => setCartItems([]);
 
   return (
-    <CartContext.Provider value={{ cartOpen, setCartOpen, cartFont, setCartFont }}>
+    <CartContext.Provider value={{ 
+      cartOpen, setCartOpen, 
+      cartItems, addToCart, removeFromCart, updateCartItemTier, clearCart 
+    }}>
       {children}
     </CartContext.Provider>
   );

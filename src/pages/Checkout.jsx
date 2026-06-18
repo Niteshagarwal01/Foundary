@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/AppContext";
 import { supabase } from "../lib/supabaseClient";
+import { TIERS } from "../components/CartDrawer";
 
 export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { clearCart } = useCart();
   
-  const [font, setFont] = useState(location.state?.font || null);
-  const [tier, setTier] = useState(location.state?.tier || null);
+  const [cartItems] = useState(location.state?.cartItems || []);
   
   const [formData, setFormData] = useState({
     firstName: user?.user_metadata?.first_name || "",
@@ -23,18 +25,20 @@ export default function Checkout() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!font || !tier) {
+    if (!cartItems || cartItems.length === 0) {
       navigate("/explore");
     }
     if (!user) {
       navigate("/sign-in");
     }
-  }, [font, tier, navigate, user]);
+  }, [cartItems, navigate, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const totalAmount = cartItems.reduce((sum, item) => sum + TIERS[item.tierIndex].amount, 0);
 
   const handleCompletePurchase = async (e) => {
     e.preventDefault();
@@ -47,7 +51,7 @@ export default function Checkout() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: tier.amount * 100, // paise
+          amount: totalAmount * 100, // paise
           currency: "INR",
           receipt: `rcpt_${user.id.slice(0,8)}_${Date.now()}`
         })
@@ -65,7 +69,7 @@ export default function Checkout() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "The Foundry",
-        description: `${tier.name} License for ${font.name}`,
+        description: `License Purchase (${cartItems.length} item${cartItems.length > 1 ? 's' : ''})`,
         order_id: orderData.id,
         handler: async function (response) {
           try {
@@ -86,18 +90,24 @@ export default function Checkout() {
               throw new Error(verifyData.error || "Payment verification failed");
             }
 
-            // 4. Issue License
-            const { error: dbError } = await supabase.from("licenses").insert({
-              user_id: user.id,
-              font_id: font.id,
-              license_type: tier.type,
-              seats: tier.seats,
-              pageviews: tier.pageviews
+            // 4. Issue Licenses
+            const licensesToInsert = cartItems.map(item => {
+              const tier = TIERS[item.tierIndex];
+              return {
+                user_id: user.id,
+                font_id: item.font.id,
+                license_type: tier.type,
+                seats: tier.seats,
+                pageviews: tier.pageviews
+              };
             });
+
+            const { error: dbError } = await supabase.from("licenses").insert(licensesToInsert);
 
             if (dbError) throw dbError;
 
-            // Success! Redirect to Dashboard
+            // Clear Cart and Redirect to Vault
+            clearCart();
             navigate("/vault");
 
           } catch (err) {
@@ -136,7 +146,7 @@ export default function Checkout() {
     }
   };
 
-  if (!font || !tier) return null;
+  if (!cartItems || cartItems.length === 0) return null;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F4EFE6] pt-32 pb-20 px-4 md:px-8">
@@ -214,20 +224,27 @@ export default function Checkout() {
             <div className="bg-[#111] border border-white/5 p-8 sticky top-32">
               <h2 className="text-xl text-[#F4EFE6] mb-6 font-bold uppercase tracking-widest border-b border-white/10 pb-4" style={{ fontFamily: "'Inter', sans-serif" }}>Order Summary</h2>
               
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-3xl mb-1 text-[#C9A355]" style={{ fontFamily: `'${font.family}', serif` }}>{font.name}</h3>
-                  <p className="text-[10px] text-[#8A8078] uppercase tracking-widest font-bold">{tier.name} License</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-2xl" style={{ fontFamily: "'Anton', sans-serif" }}>{tier.price}</span>
-                </div>
+              <div className="flex flex-col gap-6 mb-8 border-b border-white/10 pb-6">
+                {cartItems.map((item) => {
+                  const tier = TIERS[item.tierIndex];
+                  return (
+                    <div key={item.font.id} className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl mb-1 text-[#C9A355]" style={{ fontFamily: `'${item.font.family}', serif` }}>{item.font.name}</h3>
+                        <p className="text-[9px] text-[#8A8078] uppercase tracking-widest font-bold">{tier.name} License</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg" style={{ fontFamily: "'Anton', sans-serif" }}>{tier.price}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-sm">
                   <span className="text-[#8A8078]">Subtotal</span>
-                  <span>{tier.price}</span>
+                  <span>₹{totalAmount.toLocaleString("en-IN")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[#8A8078]">Tax (Calculated at checkout)</span>
@@ -237,7 +254,7 @@ export default function Checkout() {
 
               <div className="border-t border-white/10 pt-6 flex justify-between items-end">
                 <span className="text-[#8A8078] uppercase tracking-widest text-[10px] font-bold">Total Due</span>
-                <span className="text-4xl text-[#C9A355]" style={{ fontFamily: "'Anton', sans-serif" }}>{tier.price}</span>
+                <span className="text-4xl text-[#C9A355]" style={{ fontFamily: "'Anton', sans-serif" }}>₹{totalAmount.toLocaleString("en-IN")}</span>
               </div>
               
               <div className="mt-8 pt-6 border-t border-white/5">

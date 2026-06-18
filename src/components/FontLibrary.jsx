@@ -228,7 +228,7 @@ function HeartButton({ fontId, isFavorited, onToggle }) {
 const FontCard = React.memo(function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, previewState }) {
   const [hov, setHov] = useState(false);
   const ref = useIntersectionFont(font.family, font.weights);
-  const { setCartOpen, setCartFont } = useCart();
+  const { addToCart } = useCart();
 
   // Resolve display text: use preview text if set, else font name
   const displayText = previewState.text || font.name;
@@ -336,8 +336,7 @@ const FontCard = React.memo(function FontCard({ font, onSelect, isFavorited, onT
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                setCartFont(font);
-                setCartOpen(true);
+                addToCart(font);
               }}
               className="h-6 px-3 flex items-center justify-center border border-[#C9A355]/30 text-[#C9A355] text-[9px] font-bold uppercase tracking-widest hover:bg-[#C9A355] hover:text-[#0C0C0C] transition-colors rounded-sm"
             >
