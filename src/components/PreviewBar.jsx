@@ -28,7 +28,7 @@ export default function PreviewBar() {
         onClick={() => setOpen(o => !o)}
         className="fixed z-40 flex items-center justify-center rounded-full"
         style={{
-          bottom: open ? "84px" : "24px",
+          bottom: open ? "84px" : "96px",
           right: "24px",
           width: "48px",
           height: "48px",
