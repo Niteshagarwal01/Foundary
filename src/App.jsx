@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Cursor from "./components/Cursor";
 import { CartProvider } from "./context/AppContext";
 import CartDrawer from "./components/CartDrawer";
+import AIChatWidget from "./components/AIChatWidget";
 
 const ProtectedRoute = ({ children }) => {
   const { session, loading } = useAuth();
@@ -32,6 +33,7 @@ export default function App() {
           {/* Global Custom Cursor */}
           <Cursor />
           <CartDrawer />
+          <AIChatWidget />
           
           <Routes>
             <Route path="/" element={<Home />} />

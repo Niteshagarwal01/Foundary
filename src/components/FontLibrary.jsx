@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/AppContext";
 import { supabase } from "../lib/supabaseClient";
+import { getSemanticFontMatches } from "../lib/groq";
 import { FONTS } from "../data/fonts";
 import { loadFont } from "../utils/fontLoader";
 
@@ -392,6 +393,21 @@ const FontLibrary = React.memo(function FontLibrary({ onSelectFont, previewMode 
   const [copiedVisible, setCopiedVisible] = useState(false);
   const copiedTimerRef = useRef(null);
 
+  const [aiMatches, setAiMatches] = useState(null);
+  const [isAISearching, setIsAISearching] = useState(false);
+
+  const handleAISearch = async () => {
+    if (!query) return;
+    setIsAISearching(true);
+    const matches = await getSemanticFontMatches(query);
+    setAiMatches(matches.length > 0 ? matches : []);
+    setIsAISearching(false);
+  };
+
+  useEffect(() => {
+    if (!query) setAiMatches(null);
+  }, [query]);
+
   const { session, user } = useAuth();
   const isSignedIn = !!session;
 
@@ -461,7 +477,9 @@ const FontLibrary = React.memo(function FontLibrary({ onSelectFont, previewMode 
   // Filter + sort
   const filtered = FONTS
     .filter((f) => {
-      const matchQ = !query || f.name.toLowerCase().includes(query.toLowerCase()) || f.tags?.some((t) => t.includes(query.toLowerCase()));
+      const matchQ = aiMatches 
+        ? aiMatches.includes(f.id)
+        : (!query || f.name.toLowerCase().includes(query.toLowerCase()) || f.tags?.some((t) => t.includes(query.toLowerCase())));
       const matchC =
         category === "All"     ? true
         : category === "Foundry" ? f.foundry
@@ -574,10 +592,13 @@ const FontLibrary = React.memo(function FontLibrary({ onSelectFont, previewMode 
                 e.currentTarget.style.boxShadow = "none";
               }}
             />
-            <svg className="absolute right-3 top-4" width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ color: "#3A3A3A" }}>
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            <button 
+              onClick={handleAISearch}
+              disabled={isAISearching || !query}
+              className="absolute right-2 top-2 h-7 px-3 bg-[#C9A355]/10 text-[#C9A355] text-[10px] uppercase tracking-widest font-bold rounded-sm border border-[#C9A355]/20 hover:bg-[#C9A355] hover:text-[#0C0C0C] transition-colors disabled:opacity-50"
+            >
+              {isAISearching ? "Thinking..." : "AI Match ✨"}
+            </button>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {["modern", "luxury", "editorial", "retro", "bold", "minimal", "tech", "elegant"].map(t => (
                 <button

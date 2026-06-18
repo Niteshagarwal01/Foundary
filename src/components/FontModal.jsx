@@ -4,7 +4,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Slider from "@radix-ui/react-slider";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Select from "@radix-ui/react-select";
-import { X, Copy, Check, ChevronDown } from "lucide-react";
+import { X, Copy, Check, ChevronDown, Sparkles } from "lucide-react";
+import { getSmartPairings } from "../lib/groq";
 
 const COLORS = [
   { label: "Ivory", value: "#F4EFE6" },
@@ -30,6 +31,20 @@ export default function FontModal({ font, open, onClose }) {
   const [color, setColor] = useState("#F4EFE6");
   const [anim, setAnim] = useState("none");
   const [copied, setCopied] = useState(false);
+  const [smartPairings, setSmartPairings] = useState([]);
+  const [isLoadingPairings, setIsLoadingPairings] = useState(false);
+
+  // Fetch Smart Pairings
+  useEffect(() => {
+    if (open && font) {
+      setSmartPairings([]);
+      setIsLoadingPairings(true);
+      getSmartPairings(font.name).then(res => {
+        setSmartPairings(res);
+        setIsLoadingPairings(false);
+      });
+    }
+  }, [open, font]);
 
   // Reset when font changes
   useEffect(() => {
@@ -445,47 +460,40 @@ export default function FontModal({ font, open, onClose }) {
                 {/* Pairings Tab */}
                 <Tabs.Content value="pairings">
                   <div className="space-y-4">
-                    <p className="text-sm" style={{ color: "#6B6560" }}>
-                      Recommended pairings for <strong style={{ color: "#F4EFE6" }}>{font.name}</strong>
+                    <p className="text-sm flex items-center gap-2" style={{ color: "#6B6560" }}>
+                      <Sparkles size={14} style={{ color: "#C9A355" }} />
+                      AI Recommended pairings for <strong style={{ color: "#F4EFE6" }}>{font.name}</strong>
                     </p>
                     <div className="grid grid-cols-1 gap-px" style={{ background: "rgba(244,239,230,0.05)" }}>
-                      {[
-                        {
-                          role: "Body / UI",
-                          name: font.pairsWith,
-                          sample: "The best typography works invisibly, guiding the eye without demanding attention.",
-                          weight: "400",
-                        },
-                        {
-                          role: "Headline",
-                          name: font.name,
-                          sample: "Luxury has many faces.",
-                          weight: "700",
-                          family: font.family,
-                        },
-                      ].map((pair, i) => (
-                        <div key={i} className="p-6" style={{ background: "#0C0C0C" }}>
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#C9A355", letterSpacing: "0.15em" }}>
-                              {pair.role}
-                            </span>
-                            <span className="text-xs" style={{ color: "#6B6560" }}>
-                              {pair.name}
-                            </span>
-                          </div>
-                          <p
-                            style={{
-                              fontFamily: pair.family ? `'${pair.family}', serif` : `'${pair.name}', sans-serif`,
-                              fontSize: i === 0 ? "1rem" : "1.8rem",
-                              fontWeight: pair.weight,
-                              color: "#F4EFE6",
-                              lineHeight: 1.4,
-                            }}
-                          >
-                            {pair.sample}
-                          </p>
+                      {isLoadingPairings ? (
+                        <div className="p-8 text-center text-[#6B6560] text-sm animate-pulse">
+                          Generating perfect matches...
                         </div>
-                      ))}
+                      ) : smartPairings.length > 0 ? (
+                        smartPairings.map((pair, i) => (
+                          <div key={i} className="p-6" style={{ background: "#0C0C0C" }}>
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#C9A355", letterSpacing: "0.15em" }}>
+                                {pair.fontName}
+                              </span>
+                            </div>
+                            <p
+                              style={{
+                                fontSize: "1rem",
+                                fontWeight: "400",
+                                color: "#F4EFE6",
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {pair.reason}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-8 text-center text-[#6B6560] text-sm">
+                          Unable to generate pairings.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Tabs.Content>
