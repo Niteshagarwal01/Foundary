@@ -228,7 +228,8 @@ function HeartButton({ fontId, isFavorited, onToggle }) {
 const FontCard = React.memo(function FontCard({ font, onSelect, isFavorited, onToggleFavorite, onCopied, previewState }) {
   const [hov, setHov] = useState(false);
   const ref = useIntersectionFont(font.family, font.weights);
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, setCartOpen } = useCart();
+  const isInCart = cartItems.some(item => item.font.id === font.id);
 
   // Resolve display text: use preview text if set, else font name
   const displayText = previewState.text || font.name;
@@ -336,11 +337,19 @@ const FontCard = React.memo(function FontCard({ font, onSelect, isFavorited, onT
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                addToCart(font);
+                if (isInCart) {
+                  setCartOpen(true);
+                } else {
+                  addToCart(font);
+                }
               }}
-              className="h-6 px-3 flex items-center justify-center border border-[#C9A355]/30 text-[#C9A355] text-[9px] font-bold uppercase tracking-widest hover:bg-[#C9A355] hover:text-[#0C0C0C] transition-colors rounded-sm"
+              className={`h-6 px-3 flex items-center justify-center border text-[9px] font-bold uppercase tracking-widest transition-colors rounded-sm ${
+                isInCart 
+                  ? 'bg-[#C9A355] text-[#0C0C0C] border-[#C9A355]' 
+                  : 'border-[#C9A355]/30 text-[#C9A355] hover:bg-[#C9A355] hover:text-[#0C0C0C]'
+              }`}
             >
-              Buy
+              {isInCart ? "In Cart ✓" : "Buy"}
             </button>
           ) : (
             <button 

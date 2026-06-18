@@ -18,7 +18,7 @@ export default function ExplorePage() {
         <SmoothScroll>
           <div className="min-h-screen w-full bg-[#080808] text-[#F4EFE6] font-sans selection:bg-[#C9A355] selection:text-[#0C0C0C] relative overflow-hidden flex flex-col">
           
-          <Navbar activeSection="showcase" />
+          <Navbar activeSection="library" />
           <PreviewBar />
 
           {/* Main Content */}
