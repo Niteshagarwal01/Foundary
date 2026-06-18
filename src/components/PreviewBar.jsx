@@ -30,8 +30,8 @@ export default function PreviewBar() {
         style={{
           bottom: open ? "84px" : "96px",
           right: "24px",
-          width: "48px",
-          height: "48px",
+          width: "56px",
+          height: "56px",
           background: open ? "rgba(12,12,12,0.95)" : "#C9A355",
           color: open ? "#C9A355" : "#0C0C0C",
           border: "1px solid #C9A355",
