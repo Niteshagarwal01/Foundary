@@ -182,7 +182,9 @@ export default function ScrollStory() {
         <Stamp
           scrollProgress={scrollYProgress}
           text="PREMIUM QUALITY • THE FOUNDRY • "
-          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          centerTextLine1="100%"
+          centerTextLine2="QUALITY"
+          centerSubtext="SINCE DAY ONE"
           triggerRange={[0.0, 0.25]}
           initialPos={{ x: "-30vw", y: "-25vh" }}
           targetPos={{ x: "-25vw", y: "-20vh" }}
@@ -192,7 +194,9 @@ export default function ScrollStory() {
         <Stamp
           scrollProgress={scrollYProgress}
           text="100% HAND CRAFTED • TYPE STUDIO • "
-          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          centerTextLine1="HAND"
+          centerTextLine2="CRAFTED"
+          centerSubtext="NO AI USED"
           triggerRange={[0.25, 0.5]}
           initialPos={{ x: "25vw", y: "20vh" }}
           targetPos={{ x: "20vw", y: "15vh" }}
@@ -202,7 +206,9 @@ export default function ScrollStory() {
         <Stamp
           scrollProgress={scrollYProgress}
           text="NO AI CURVES • HUMAN MADE • "
-          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          centerTextLine1="HUMAN"
+          centerTextLine2="MADE"
+          centerSubtext="ORIGINAL ART"
           triggerRange={[0.5, 0.75]}
           initialPos={{ x: "-25vw", y: "25vh" }}
           targetPos={{ x: "-20vw", y: "20vh" }}
@@ -212,7 +218,9 @@ export default function ScrollStory() {
         <Stamp
           scrollProgress={scrollYProgress}
           text="NEW DELHI • ORIGINAL DESIGN • "
-          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          centerTextLine1="THE"
+          centerTextLine2="FOUNDRY"
+          centerSubtext="EST 2026"
           triggerRange={[0.75, 1.0]}
           initialPos={{ x: "25vw", y: "-25vh" }}
           targetPos={{ x: "20vw", y: "-20vh" }}
@@ -225,7 +233,7 @@ export default function ScrollStory() {
 }
 
 /* ── Perfectly Crafted Cinematic Stamp Component ── */
-function Stamp({ scrollProgress, text, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
+function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, centerSubtext, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
   const filter = useTransform(
     scrollProgress,
     [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1] - 0.1, triggerRange[1]],
@@ -314,10 +322,10 @@ function Stamp({ scrollProgress, text, triggerRange, initialPos, targetPos, rota
         <circle cx="100" cy="100" r="72" stroke={`url(#grad-${textId})`} strokeWidth="1.5" opacity="0.6" />
         
         {/* Center content - hyper refined */}
-        <text x="100" y="98" textAnchor="middle" style={{ fontSize: "32px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>THE</text>
-        <text x="100" y="122" textAnchor="middle" style={{ fontSize: "28px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>FOUNDRY</text>
+        <text x="100" y="98" textAnchor="middle" style={{ fontSize: "32px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
+        <text x="100" y="122" textAnchor="middle" style={{ fontSize: "28px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
         
-        <text x="100" y="142" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">EST 2026</text>
+        <text x="100" y="142" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">{centerSubtext}</text>
         
         {/* Star adornments */}
         <path d="M100 35 L102 42 L109 42 L103 46 L105 53 L100 49 L95 53 L97 46 L91 42 L98 42 Z" fill="#C9A355" opacity="0.8"/>
