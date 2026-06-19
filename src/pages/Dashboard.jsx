@@ -594,9 +594,9 @@ function OverviewTab({ firstName, libraryFonts, licenses }) {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-[#F4EFE6] text-sm font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>{lic.font_name}</p>
+                    <p className="text-[#F4EFE6] text-sm font-semibold" style={{ fontFamily: "'Inter', sans-serif" }}>{FONTS.find(f => f.id === lic.font_id)?.name || lic.font_name}</p>
                     <p className="text-[#6B6560] text-[10px] uppercase tracking-widest mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {lic.license_type} License · {new Date(lic.purchase_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      {lic.license_type} License · {new Date(lic.purchased_at || lic.purchase_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                   </div>
                 </div>
@@ -637,10 +637,19 @@ function LibraryTab({ libraryFonts, loading, onSelectFont }) {
     setTimeout(() => setToastMsg(""), 2000);
   };
 
-  const handleDownload = (fontName) => {
-    setToastMsg(`Packaging ${fontName}...`);
-    setTimeout(() => setToastMsg("Download Complete!"), 2000);
-    setTimeout(() => setToastMsg(""), 4000);
+  const handleDownload = (font) => {
+    // Generate a real CSS kit for this font and trigger download
+    const familyEncoded = font.family.replace(/ /g, "+");
+    const cssContent = `/* Foundry — ${font.name} Font Kit */\n@import url('https://fonts.googleapis.com/css2?family=${familyEncoded}:wght@300;400;700&display=swap');\n\n.font-${font.family.toLowerCase().replace(/\s+/g, '-')} {\n  font-family: '${font.family}', serif;\n  font-weight: 400;\n  letter-spacing: 0.02em;\n}\n`;
+    const blob = new Blob([cssContent], { type: 'text/css' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${font.family.replace(/\s+/g, '-').toLowerCase()}-kit.css`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setToastMsg(`✓ ${font.name} CSS kit downloaded!`);
+    setTimeout(() => setToastMsg(""), 3000);
   };
 
   return (
@@ -741,11 +750,11 @@ function LibraryTab({ libraryFonts, loading, onSelectFont }) {
                 <div className="relative z-10 mt-auto pt-6 border-t border-white/[0.05] flex justify-between items-center">
                   <span className="text-[#6B6560] text-[10px] uppercase tracking-widest font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>Saved {font.date}</span>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); handleDownload(font.name); }}
+                    onClick={(e) => { e.stopPropagation(); handleDownload(font); }}
                     className="text-[#C9A355] text-[10px] uppercase tracking-widest font-bold flex items-center gap-2 hover:text-[#E2C07A] transition-colors"
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
-                    Download Package
+                    Download CSS Kit
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
@@ -853,7 +862,15 @@ function LicensesTab({ licenses }) {
 
                   {/* Hover Actions */}
                   <div className="absolute inset-0 bg-[#0A0A0A]/95 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                    <button className="bg-[#C9A355] text-[#0C0C0C] px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#E2C07A] hover:scale-105 hover:shadow-[0_0_30px_rgba(201,163,85,0.5)] transition-all mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <button 
+                      onClick={() => {
+                        // Open a print-friendly license certificate view
+                        const w = window.open('', '_blank');
+                        w.document.write(`<html><head><title>License Certificate — ${lic.font_id}</title><style>body{font-family:monospace;padding:40px;max-width:600px;margin:auto;background:#fff;color:#111}h1{border-bottom:2px solid #C9A355;padding-bottom:12px}table{width:100%;border-collapse:collapse;margin-top:20px}td{padding:8px;border-bottom:1px solid #eee}td:first-child{font-weight:bold;color:#555}</style></head><body><h1>FOUNDRY — Font License Certificate</h1><table><tr><td>Font</td><td>${FONTS.find(f => f.id === lic.font_id)?.name || lic.font_id}</td></tr><tr><td>License Type</td><td>${lic.license_type}</td></tr><tr><td>Cert ID</td><td>${lic.id}</td></tr><tr><td>Issued</td><td>${new Date(lic.purchased_at).toLocaleDateString()}</td></tr><tr><td>Amount Paid</td><td>₹${lic.price?.toLocaleString('en-IN')}</td></tr></table><br/><small>This certificate is issued by Foundry. For licensing questions contact support.</small></body></html>`);
+                        w.document.close();
+                        w.print();
+                      }}
+                      className="bg-[#C9A355] text-[#0C0C0C] px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[#E2C07A] hover:scale-105 hover:shadow-[0_0_30px_rgba(201,163,85,0.5)] transition-all mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
                       Download PDF
                     </button>
                   </div>
@@ -876,7 +893,7 @@ function LicensesTab({ licenses }) {
           </ul>
           <p className="mb-4"><strong>Restrictions:</strong> You may not modify, reverse engineer, decompile, or create derivative works of the Software. You may not distribute, sell, or share the font files with third parties. You may not use the fonts to train AI or machine learning models without express permission.</p>
           <p className="mb-4"><strong>Intellectual Property:</strong> The Software and its accompanying documentation, including the design of the letterforms, are the exclusive property of Foundry and are protected by copyright and intellectual property laws.</p>
-          <p className="text-xs italic mt-8 text-[#6B6560]">Last updated: October 2026. If you have any questions regarding your specific use case, please contact our licensing department.</p>
+          <p className="text-xs italic mt-8 text-[#6B6560]">Last updated: June 2026. If you have any questions regarding your specific use case, please contact our licensing department.</p>
         </div>
       </div>
     </div>

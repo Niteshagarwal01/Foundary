@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /vault
+Disallow: /checkout
+Disallow: /api/
+
+Sitemap: https://thefoundry.vercel.app/sitemap.xml

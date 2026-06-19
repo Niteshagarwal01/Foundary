@@ -679,7 +679,7 @@ const FontLibrary = React.memo(function FontLibrary({ onSelectFont, previewMode 
             {["A-Z", "Foundry First"].map((mode) => (
               <motion.button
                 key={mode}
-                onClick={() => { setSortMode(mode === "A-Z" ? "alpha" : "foundry"); setPage(0); }}
+                onClick={() => { setSortMode(mode === "A-Z" ? "alpha" : "foundry"); setVisibleCount(INITIAL_COUNT); }}
                 className="px-3 py-1 text-xs font-semibold uppercase"
                 style={{
                   fontFamily: "'Inter', sans-serif",
