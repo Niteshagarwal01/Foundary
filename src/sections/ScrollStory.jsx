@@ -318,12 +318,12 @@ function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, centerS
         <circle cx="100" cy="100" r="66" stroke={`url(#grad-${textId})`} strokeWidth="1" strokeDasharray="3 4" opacity="0.8" />
         <circle cx="100" cy="100" r="72" stroke={`url(#grad-${textId})`} strokeWidth="1.5" opacity="0.6" />
         
-        {/* Center content - perfectly balanced based on presence of subtext */}
-        <text x="100" y={centerSubtext ? 94 : 104} textAnchor="middle" style={{ fontSize: "30px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
-        <text x="100" y={centerSubtext ? 122 : 132} textAnchor="middle" style={{ fontSize: "26px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
+        {/* Center content - mathematically balanced vertically between the stars */}
+        <text x="100" y={centerSubtext ? 87 : 96} textAnchor="middle" style={{ fontSize: "30px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
+        <text x="100" y={centerSubtext ? 115 : 126} textAnchor="middle" style={{ fontSize: "26px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
         
         {centerSubtext && (
-          <text x="100" y="144" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">{centerSubtext}</text>
+          <text x="100" y="135" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">{centerSubtext}</text>
         )}
         
         {/* Star adornments perfectly centered using text */}
