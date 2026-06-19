@@ -224,8 +224,8 @@ export default function ScrollStory() {
   );
 }
 
-/* ── Redesigned Cinematic Stamp Component ── */
-function Stamp({ scrollProgress, text, path, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
+/* ── Perfectly Crafted Cinematic Stamp Component ── */
+function Stamp({ scrollProgress, text, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
   const filter = useTransform(
     scrollProgress,
     [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1] - 0.1, triggerRange[1]],
@@ -250,19 +250,12 @@ function Stamp({ scrollProgress, text, path, triggerRange, initialPos, targetPos
     rotateRange
   );
 
-  const x = useTransform(
-    scrollProgress,
-    [triggerRange[0], triggerRange[1]],
-    [initialPos.x, targetPos.x]
-  );
-
-  const y = useTransform(
-    scrollProgress,
-    [triggerRange[0], triggerRange[1]],
-    [initialPos.y, targetPos.y]
-  );
+  // We map the string pos "vw/vh" directly since Framer Motion supports string interpolation
+  const x = useTransform(scrollProgress, [triggerRange[0], triggerRange[1]], [initialPos.x, targetPos.x]);
+  const y = useTransform(scrollProgress, [triggerRange[0], triggerRange[1]], [initialPos.y, targetPos.y]);
 
   const textId = `textPath-${text.replace(/[^a-zA-Z0-9]/g, '')}`;
+  const repeatedText = `${text}${text}${text}`;
 
   return (
     <motion.div
@@ -277,39 +270,58 @@ function Stamp({ scrollProgress, text, path, triggerRange, initialPos, targetPos
         filter,
         zIndex: 5,
         pointerEvents: "none",
-        color: "#C9A355",
-        opacity: useTransform(opacity, o => o * 0.12), // Very subtle, cinematic watermark
-        mixBlendMode: "screen", // Blend beautifully with the black background and light flares
+        opacity: useTransform(opacity, o => o * 0.8), // high visibility for glass
         width: size,
         height: size,
         marginLeft: -size / 2,
         marginTop: -size / 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <svg width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Premium Glassmorphic Backdrop */}
+      <div 
+        className="absolute inset-0 rounded-full" 
+        style={{ 
+          background: "rgba(201,163,85,0.02)", 
+          backdropFilter: "blur(12px)", 
+          border: "1px solid rgba(201,163,85,0.2)", 
+          boxShadow: "0 0 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(201,163,85,0.08)" 
+        }} 
+      />
+
+      <svg width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0">
         <defs>
           <linearGradient id={`grad-${textId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#C9A355" stopOpacity="0.8" />
+            <stop offset="0%" stopColor="#C9A355" stopOpacity="1" />
             <stop offset="50%" stopColor="#F4EFE6" stopOpacity="1" />
-            <stop offset="100%" stopColor="#C9A355" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#C9A355" stopOpacity="0.4" />
           </linearGradient>
         </defs>
 
-        <path id={textId} d={path} fill="none"/>
-        <text style={{ fontSize: "16px", fontWeight: "300", fontFamily: "'Inter', sans-serif", letterSpacing: "8px", textTransform: "uppercase" }} fill={`url(#grad-${textId})`}>
-          <textPath href={`#${textId}`} startOffset="50%" textAnchor="middle">
-            {text}
+        {/* Perfect clockwise circle starting from top-center */}
+        <path id={textId} d="M 100, 15 A 85 85 0 1 1 99.9 15" fill="none" />
+        
+        <text style={{ fontSize: "12px", fontWeight: "600", fontFamily: "'Inter', sans-serif", letterSpacing: "4px", textTransform: "uppercase" }} fill={`url(#grad-${textId})`}>
+          <textPath href={`#${textId}`} startOffset="0%">
+            {repeatedText}
           </textPath>
         </text>
         
-        {/* Elegant, thin concentric rings */}
-        <circle cx="100" cy="100" r="50" stroke={`url(#grad-${textId})`} strokeWidth="0.5" strokeDasharray="2 4" />
-        <circle cx="100" cy="100" r="75" stroke={`url(#grad-${textId})`} strokeWidth="0.5" />
-        <circle cx="100" cy="100" r="82" stroke={`url(#grad-${textId})`} strokeWidth="1" />
+        {/* Crisp metallic inner rings */}
+        <circle cx="100" cy="100" r="66" stroke={`url(#grad-${textId})`} strokeWidth="1" strokeDasharray="3 4" opacity="0.8" />
+        <circle cx="100" cy="100" r="72" stroke={`url(#grad-${textId})`} strokeWidth="1.5" opacity="0.6" />
         
-        {/* Center content - refined */}
-        <text x="100" y="105" textAnchor="middle" style={{ fontSize: "20px", fontFamily: "'Anton', sans-serif", letterSpacing: "4px" }} fill={`url(#grad-${textId})`}>EST.</text>
-        <text x="100" y="125" textAnchor="middle" style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif", fontWeight: "400", letterSpacing: "6px" }} fill={`url(#grad-${textId})`}>2026</text>
+        {/* Center content - hyper refined */}
+        <text x="100" y="98" textAnchor="middle" style={{ fontSize: "32px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>THE</text>
+        <text x="100" y="122" textAnchor="middle" style={{ fontSize: "28px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>FOUNDRY</text>
+        
+        <text x="100" y="142" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">EST 2026</text>
+        
+        {/* Star adornments */}
+        <path d="M100 35 L102 42 L109 42 L103 46 L105 53 L100 49 L95 53 L97 46 L91 42 L98 42 Z" fill="#C9A355" opacity="0.8"/>
+        <path d="M100 160 L102 153 L109 153 L103 149 L105 142 L100 146 L95 142 L97 149 L91 153 L98 153 Z" fill="#C9A355" opacity="0.8"/>
       </svg>
     </motion.div>
   );
