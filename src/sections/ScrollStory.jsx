@@ -258,12 +258,12 @@ function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, centerS
     rotateRange
   );
 
-  // We map the string pos "vw/vh" directly since Framer Motion supports string interpolation
   const x = useTransform(scrollProgress, [triggerRange[0], triggerRange[1]], [initialPos.x, targetPos.x]);
   const y = useTransform(scrollProgress, [triggerRange[0], triggerRange[1]], [initialPos.y, targetPos.y]);
 
   const textId = `textPath-${text.replace(/[^a-zA-Z0-9]/g, '')}`;
-  const repeatedText = `${text}${text}${text}`;
+  // Only repeat twice to prevent multi-wrap overlapping
+  const repeatedText = `${text}${text}`;
 
   return (
     <motion.div
@@ -311,8 +311,8 @@ function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, centerS
         {/* Perfect clockwise circle starting from top-center */}
         <path id={textId} d="M 100, 15 A 85 85 0 1 1 99.9 15" fill="none" />
         
-        <text style={{ fontSize: "12px", fontWeight: "600", fontFamily: "'Inter', sans-serif", letterSpacing: "4px", textTransform: "uppercase" }} fill={`url(#grad-${textId})`}>
-          <textPath href={`#${textId}`} startOffset="0%">
+        <text style={{ fontSize: "13px", fontWeight: "600", fontFamily: "'Inter', sans-serif", letterSpacing: "4px", textTransform: "uppercase" }} fill={`url(#grad-${textId})`}>
+          <textPath href={`#${textId}`} startOffset="0%" textLength="534" lengthAdjust="spacing">
             {repeatedText}
           </textPath>
         </text>
@@ -321,15 +321,15 @@ function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, centerS
         <circle cx="100" cy="100" r="66" stroke={`url(#grad-${textId})`} strokeWidth="1" strokeDasharray="3 4" opacity="0.8" />
         <circle cx="100" cy="100" r="72" stroke={`url(#grad-${textId})`} strokeWidth="1.5" opacity="0.6" />
         
-        {/* Center content - hyper refined */}
-        <text x="100" y="98" textAnchor="middle" style={{ fontSize: "32px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
-        <text x="100" y="122" textAnchor="middle" style={{ fontSize: "28px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
+        {/* Center content - perfectly balanced vertically */}
+        <text x="100" y="90" textAnchor="middle" style={{ fontSize: "30px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
+        <text x="100" y="118" textAnchor="middle" style={{ fontSize: "26px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
         
-        <text x="100" y="142" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">{centerSubtext}</text>
+        <text x="100" y="140" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">{centerSubtext}</text>
         
-        {/* Star adornments */}
-        <path d="M100 35 L102 42 L109 42 L103 46 L105 53 L100 49 L95 53 L97 46 L91 42 L98 42 Z" fill="#C9A355" opacity="0.8"/>
-        <path d="M100 160 L102 153 L109 153 L103 149 L105 142 L100 146 L95 142 L97 149 L91 153 L98 153 Z" fill="#C9A355" opacity="0.8"/>
+        {/* Star adornments perfectly centered using text */}
+        <text x="100" y="52" textAnchor="middle" fontSize="16" fill="#C9A355" opacity="0.8">★</text>
+        <text x="100" y="165" textAnchor="middle" fontSize="16" fill="#C9A355" opacity="0.8">★</text>
       </svg>
     </motion.div>
   );
