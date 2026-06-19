@@ -101,7 +101,7 @@ export default function ScrollStory() {
   return (
     <section
       ref={containerRef}
-      className="hidden xl:block my-32" // Using margins to create space from other sections
+      className="hidden xl:block my-12" // Reduced margins to prevent massive empty space
       style={{
         height: "400vh", // Provides 4 screens worth of scroll distance for the acts
         position: "relative",
