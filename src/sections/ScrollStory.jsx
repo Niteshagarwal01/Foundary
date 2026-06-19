@@ -217,6 +217,7 @@ export default function ScrollStory() {
           text="NEW DELHI • ORIGINAL DESIGN • "
           centerTextLine1="THE"
           centerTextLine2="FOUNDRY"
+          centerSubtext="EST. 2026"
           triggerRange={[0.75, 1.0]}
           initialPos={{ x: "25vw", y: "-25vh" }}
           targetPos={{ x: "20vw", y: "-20vh" }}
@@ -229,7 +230,7 @@ export default function ScrollStory() {
 }
 
 /* ── Perfectly Crafted Cinematic Stamp Component ── */
-function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
+function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, centerSubtext, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
   const filter = useTransform(
     scrollProgress,
     [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1] - 0.1, triggerRange[1]],
@@ -317,11 +318,13 @@ function Stamp({ scrollProgress, text, centerTextLine1, centerTextLine2, trigger
         <circle cx="100" cy="100" r="66" stroke={`url(#grad-${textId})`} strokeWidth="1" strokeDasharray="3 4" opacity="0.8" />
         <circle cx="100" cy="100" r="72" stroke={`url(#grad-${textId})`} strokeWidth="1.5" opacity="0.6" />
         
-        {/* Center content - perfectly balanced vertically */}
-        <text x="100" y="90" textAnchor="middle" style={{ fontSize: "30px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
-        <text x="100" y="118" textAnchor="middle" style={{ fontSize: "26px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
+        {/* Center content - dynamically balanced based on presence of subtext */}
+        <text x="100" y={centerSubtext ? 90 : 94} textAnchor="middle" style={{ fontSize: "30px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine1}</text>
+        <text x="100" y={centerSubtext ? 118 : 122} textAnchor="middle" style={{ fontSize: "26px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill={`url(#grad-${textId})`}>{centerTextLine2}</text>
         
-        <text x="100" y="140" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">EST. 2026</text>
+        {centerSubtext && (
+          <text x="100" y="140" textAnchor="middle" style={{ fontSize: "10px", fontFamily: "'Inter', sans-serif", fontWeight: "600", letterSpacing: "6px" }} fill="#F4EFE6" opacity="0.7">{centerSubtext}</text>
+        )}
         
         {/* Star adornments perfectly centered using text */}
         <text x="100" y="52" textAnchor="middle" fontSize="16" fill="#C9A355" opacity="0.8">★</text>
