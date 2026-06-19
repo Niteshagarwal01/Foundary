@@ -177,8 +177,141 @@ export default function ScrollStory() {
                 }}
             />
         </div>
+
+        {/* ── Cinematic Journey Stamps ── */}
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="PREMIUM QUALITY • THE FOUNDRY • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.0, 0.25]}
+          initialPos={{ x: "-30vw", y: "-25vh" }}
+          targetPos={{ x: "-25vw", y: "-20vh" }}
+          rotateRange={[0, 45]}
+          size={300}
+        />
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="100% HAND CRAFTED • TYPE STUDIO • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.25, 0.5]}
+          initialPos={{ x: "25vw", y: "20vh" }}
+          targetPos={{ x: "20vw", y: "15vh" }}
+          rotateRange={[-45, 0]}
+          size={280}
+        />
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="NO AI CURVES • HUMAN MADE • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.5, 0.75]}
+          initialPos={{ x: "-25vw", y: "25vh" }}
+          targetPos={{ x: "-20vw", y: "20vh" }}
+          rotateRange={[45, -45]}
+          size={320}
+        />
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="NEW DELHI • ORIGINAL DESIGN • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.75, 1.0]}
+          initialPos={{ x: "25vw", y: "-25vh" }}
+          targetPos={{ x: "20vw", y: "-20vh" }}
+          rotateRange={[90, 0]}
+          size={300}
+        />
       </div>
     </section>
+  );
+}
+
+/* ── Redesigned Cinematic Stamp Component ── */
+function Stamp({ scrollProgress, text, path, triggerRange, initialPos, targetPos, rotateRange, size = 300, scaleRange = [1.5, 1, 0.9] }) {
+  const filter = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1] - 0.1, triggerRange[1]],
+    ["blur(12px)", "blur(0px)", "blur(0px)", "blur(12px)"]
+  );
+
+  const opacity = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1] - 0.1, triggerRange[1]],
+    [0, 1, 1, 0]
+  );
+  
+  const scale = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1]],
+    scaleRange
+  );
+
+  const rotate = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[1]],
+    rotateRange
+  );
+
+  const x = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[1]],
+    [initialPos.x, targetPos.x]
+  );
+
+  const y = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[1]],
+    [initialPos.y, targetPos.y]
+  );
+
+  const textId = `textPath-${text.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        x,
+        y,
+        scale,
+        rotate,
+        filter,
+        zIndex: 5,
+        pointerEvents: "none",
+        color: "#C9A355",
+        opacity: useTransform(opacity, o => o * 0.12), // Very subtle, cinematic watermark
+        mixBlendMode: "screen", // Blend beautifully with the black background and light flares
+        width: size,
+        height: size,
+        marginLeft: -size / 2,
+        marginTop: -size / 2,
+      }}
+    >
+      <svg width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id={`grad-${textId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#C9A355" stopOpacity="0.8" />
+            <stop offset="50%" stopColor="#F4EFE6" stopOpacity="1" />
+            <stop offset="100%" stopColor="#C9A355" stopOpacity="0.2" />
+          </linearGradient>
+        </defs>
+
+        <path id={textId} d={path} fill="none"/>
+        <text style={{ fontSize: "16px", fontWeight: "300", fontFamily: "'Inter', sans-serif", letterSpacing: "8px", textTransform: "uppercase" }} fill={`url(#grad-${textId})`}>
+          <textPath href={`#${textId}`} startOffset="50%" textAnchor="middle">
+            {text}
+          </textPath>
+        </text>
+        
+        {/* Elegant, thin concentric rings */}
+        <circle cx="100" cy="100" r="50" stroke={`url(#grad-${textId})`} strokeWidth="0.5" strokeDasharray="2 4" />
+        <circle cx="100" cy="100" r="75" stroke={`url(#grad-${textId})`} strokeWidth="0.5" />
+        <circle cx="100" cy="100" r="82" stroke={`url(#grad-${textId})`} strokeWidth="1" />
+        
+        {/* Center content - refined */}
+        <text x="100" y="105" textAnchor="middle" style={{ fontSize: "20px", fontFamily: "'Anton', sans-serif", letterSpacing: "4px" }} fill={`url(#grad-${textId})`}>EST.</text>
+        <text x="100" y="125" textAnchor="middle" style={{ fontSize: "12px", fontFamily: "'Inter', sans-serif", fontWeight: "400", letterSpacing: "6px" }} fill={`url(#grad-${textId})`}>2026</text>
+      </svg>
+    </motion.div>
   );
 }
 
