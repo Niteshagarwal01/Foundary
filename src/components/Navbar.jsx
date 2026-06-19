@@ -107,7 +107,7 @@ export default function Navbar({ activeSection }) {
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
     >
       <div
-        className="flex items-center justify-between px-8 py-4 transition-all duration-500 relative z-50"
+        className="flex items-center justify-between px-8 py-4 transition-all duration-500 relative z-[110]"
         style={{
           borderBottom:   scrolled ? "1px solid rgba(201,163,85,0.15)" : "1px solid transparent",
           background:     scrolled ? "rgba(10,10,10,0.94)"             : "transparent",
