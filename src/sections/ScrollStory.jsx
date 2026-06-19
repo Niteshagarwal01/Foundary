@@ -1,197 +1,91 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-/* ─────────────────────────────────────────────
-   Story data
-   Each "line" is an array of word objects.
-   type: "anton" | "kaushan" | "blend"
-   The last line gets "blend" which mimics the hero style.
-──────────────────────────────────────────────── */
-const STORY_LINES = [
-  [
-    { text: "Every",   type: "kaushan", gold: false },
-    { text: "great",   type: "anton",   gold: false },
-    { text: "brand",   type: "anton",   gold: true  },
-    { text: "begins",  type: "kaushan", gold: false },
-    { text: "with",    type: "anton",   gold: false },
-    { text: "a",       type: "kaushan", gold: false },
-    { text: "letter.", type: "anton",   gold: true  },
-  ],
-  [
-    { text: "Typography", type: "anton",   gold: false },
-    { text: "is",         type: "kaushan", gold: false },
-    { text: "not",        type: "anton",   gold: false },
-    { text: "decoration.", type: "kaushan", gold: false },
-    { text: "It",         type: "anton",   gold: false },
-    { text: "is",         type: "kaushan", gold: false },
-    { text: "voice.",     type: "anton",   gold: true  },
-  ],
-  [
-    { text: "The",        type: "kaushan", gold: false },
-    { text: "right",      type: "anton",   gold: false },
-    { text: "font",       type: "kaushan", gold: true  },
-    { text: "changes",    type: "anton",   gold: false },
-    { text: "everything.", type: "kaushan", gold: false },
-  ],
-  [
-    { text: "This",     type: "blend", gold: false },
-    { text: "is",       type: "blend", gold: false },
-    { text: "The",      type: "blend", gold: true  },
-    { text: "Foundry.", type: "blend", gold: true  },
-  ],
-];
-
-/* Flatten to a single word list with their line index */
-const ALL_WORDS = STORY_LINES.flatMap((line, lineIdx) =>
-  line.map((word, wordIdx) => ({ ...word, lineIdx, wordIdx }))
-);
-const TOTAL_WORDS = ALL_WORDS.length;
-
-function getWordStyle(word, isActive, isPast) {
-  const opacity = isActive ? 1 : isPast ? 0.22 : 0;
-  const blur    = isActive ? 0 : isPast ? 0 : 4;
-
-  let fontFamily, fontWeight, fontSize;
-
-  if (word.type === "anton") {
-    fontFamily  = "'Anton', Impact, sans-serif";
-    fontWeight  = 400;
-    fontSize    = "clamp(2rem, 5vw, 4rem)";
-  } else if (word.type === "kaushan") {
-    fontFamily  = "'Kaushan Script', cursive";
-    fontWeight  = 400;
-    fontSize    = "clamp(1.8rem, 4.5vw, 3.6rem)";
-  } else {
-    // blend — Anton + Kaushan alternating per char visual trick:
-    // we actually stack them via two spans, but keep it simple here
-    fontFamily  = "'Anton', Impact, sans-serif";
-    fontWeight  = 400;
-    fontSize    = "clamp(2.4rem, 6.5vw, 5rem)";
-  }
-
-  const color = word.gold
-    ? "#C9A355"
-    : word.type === "kaushan"
-    ? "#F4EFE6"
-    : "#F4EFE6";
-
-  const textShadow = isActive && word.gold
-    ? "0 0 30px rgba(201,163,85,0.8), 0 0 60px rgba(201,163,85,0.4), 0 0 100px rgba(201,163,85,0.2)"
-    : isActive
-    ? "0 0 20px rgba(244,239,230,0.25)"
-    : "none";
-
-  return {
-    opacity,
-    filter: `blur(${blur}px)`,
-    color,
-    fontFamily,
-    fontWeight,
-    fontSize,
-    textShadow,
-    display: "inline-block",
-    margin: "0 6px 0 0",
-    transition: "opacity 0.4s ease, filter 0.4s ease, text-shadow 0.4s ease",
-    letterSpacing: word.type === "anton" ? "0.03em" : "0.01em",
-    lineHeight: 1.15,
-  };
-}
-
-/* ── Single word that reacts to scroll progress ── */
-function Word({ word, index, scrollProgress }) {
-  // Fit all word animations between scrollProgress 0.1 and 0.9
-  const wordFraction = 0.8 / TOTAL_WORDS;
-  const activateAt   = 0.1 + index * wordFraction;
-  const deactivateAt = 0.1 + (index + 2.5) * wordFraction;
-
-  const rawOpacity = useTransform(
+function CinematicAct({ scrollProgress, range, children }) {
+  const filter = useTransform(
     scrollProgress,
-    [activateAt - 0.01, activateAt, deactivateAt, deactivateAt + wordFraction],
-    [0, 1, 1, 0.18]
+    [range[0], range[0] + 0.05, range[1] - 0.05, range[1]],
+    ["blur(32px)", "blur(0px)", "blur(0px)", "blur(32px)"]
   );
 
-  const rawBlur = useTransform(
-    scrollProgress,
-    [activateAt - 0.01, activateAt],
-    [6, 0]
-  );
-
-  const rawGlow = useTransform(
-    scrollProgress,
-    [activateAt - 0.01, activateAt, deactivateAt],
-    [0, 1, 0]
-  );
-
-  let fontFamily, fontSize;
-  if (word.type === "anton") {
-    fontFamily = "'Anton', Impact, sans-serif";
-    fontSize   = "clamp(2rem, 5vw, 4rem)";
-  } else if (word.type === "kaushan") {
-    fontFamily = "'Kaushan Script', cursive";
-    fontSize   = "clamp(1.8rem, 4.5vw, 3.6rem)";
-  } else {
-    fontFamily = "'Anton', Impact, sans-serif";
-    fontSize   = "clamp(2.4rem, 6.5vw, 5rem)";
-  }
-
-  const isBlendLine = word.type === "blend";
-
-  return (
-    <motion.span
-      style={{
-        display: "inline-block",
-        marginRight: "0.28em",
-        marginBottom: "0.1em",
-        fontFamily,
-        fontSize,
-        fontWeight: 400,
-        letterSpacing: word.type === "anton" || word.type === "blend" ? "0.03em" : "0.01em",
-        lineHeight: 1.15,
-        color: word.gold ? "#C9A355" : "#F4EFE6",
-        opacity: rawOpacity,
-        // For the last line blend style, add a bottom border-like glow
-        borderBottom: isBlendLine && word.gold ? "1px solid rgba(201,163,85,0.35)" : "none",
-        paddingBottom: isBlendLine ? "2px" : 0,
-      }}
-    >
-      <motion.span
-        style={{
-          display: "inline-block",
-          opacity: rawOpacity,
-          filter: useTransform(rawBlur, (v) => `blur(${v}px)`),
-          textShadow: useTransform(rawGlow, (g) =>
-            word.gold
-              ? `0 0 ${30 * g}px rgba(201,163,85,${0.85 * g}), 0 0 ${60 * g}px rgba(201,163,85,${0.4 * g}), 0 0 ${100 * g}px rgba(201,163,85,${0.2 * g})`
-              : `0 0 ${20 * g}px rgba(244,239,230,${0.3 * g})`
-          ),
-        }}
-      >
-        {word.text}
-      </motion.span>
-    </motion.span>
-  );
-}
-
-/* ── Line separator ornament ── */
-function LineSeparator({ scrollProgress, triggerAt }) {
   const opacity = useTransform(
     scrollProgress,
-    [triggerAt - 0.02, triggerAt + 0.03],
-    [0, 1]
+    [range[0], range[0] + 0.05, range[1] - 0.05, range[1]],
+    [0, 1, 1, 0]
   );
+
+  const scale = useTransform(
+    scrollProgress,
+    [range[0], range[1]],
+    [1.15, 0.95]
+  );
+
   return (
     <motion.div
       style={{
+        position: "absolute",
+        inset: 0,
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        margin: "8px 0 20px",
+        justifyContent: "center",
+        padding: "0 5vw",
         opacity,
+        scale,
+        filter,
+        pointerEvents: "none"
       }}
     >
-      <div style={{ height: 1, flex: 1, background: "rgba(201,163,85,0.18)" }} />
-      <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#C9A355", opacity: 0.5 }} />
-      <div style={{ height: 1, flex: 1, background: "rgba(201,163,85,0.18)" }} />
+      <div style={{ maxWidth: "1400px", width: "100%", textAlign: "center" }}>
+        {children}
+      </div>
+    </motion.div>
+  );
+}
+
+function GiantAstrolabe({ scrollProgress }) {
+  const rotate = useTransform(scrollProgress, [0, 1], [0, -120]);
+  const size = "150vh"; // Giant element extending off-screen
+
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        x: "-50%",
+        y: "-50%",
+        width: size,
+        height: size,
+        opacity: 0.06, // Very subtle, cinematic backdrop
+        rotate,
+        pointerEvents: "none"
+      }}
+    >
+      <svg width="100%" height="100%" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Main large text path */}
+        <path id="giant-path-outer" d="M 500, 500 m -450, 0 a 450,450 0 1,1 900,0 a 450,450 0 1,1 -900,0" fill="none"/>
+        <path id="giant-path-inner" d="M 500, 500 m -350, 0 a 350,350 0 1,1 700,0 a 350,350 0 1,1 -700,0" fill="none"/>
+        
+        {/* Outer Ring Text */}
+        <text style={{ fontSize: "28px", fontWeight: "bold", fontFamily: "'Inter', sans-serif", letterSpacing: "14px", textTransform: "uppercase" }} fill="#C9A355">
+          <textPath href="#giant-path-outer" startOffset="0%">
+             PREMIUM TYPOGRAPHY • HUMAN CRAFTED • THE FOUNDRY STUDIO • PREMIUM TYPOGRAPHY • HUMAN CRAFTED • THE FOUNDRY STUDIO • 
+          </textPath>
+        </text>
+
+        {/* Inner Ring Text */}
+        <text style={{ fontSize: "20px", fontWeight: 500, fontFamily: "'Inter', sans-serif", letterSpacing: "8px", textTransform: "uppercase" }} fill="#F4EFE6">
+          <textPath href="#giant-path-inner" startOffset="10%">
+             ENGINEERING VOICES • ESTABLISHED 2026 • NEW DELHI • ENGINEERING VOICES • ESTABLISHED 2026 • NEW DELHI •
+          </textPath>
+        </text>
+
+        {/* Concentric rings */}
+        <circle cx="500" cy="500" r="300" stroke="#C9A355" strokeWidth="2" strokeDasharray="10 10" />
+        <circle cx="500" cy="500" r="400" stroke="#F4EFE6" strokeWidth="1" strokeDasharray="4 12" />
+        <circle cx="500" cy="500" r="480" stroke="#C9A355" strokeWidth="4" />
+        <circle cx="500" cy="500" r="495" stroke="#F4EFE6" strokeWidth="1" />
+      </svg>
     </motion.div>
   );
 }
@@ -204,237 +98,199 @@ export default function ScrollStory() {
     offset: ["start start", "end end"],
   });
 
-  const lineData = STORY_LINES.reduce((acc, line) => {
-    const start = acc.length > 0 ? acc[acc.length - 1].end : 0;
-    const end = start + line.length;
-    acc.push({ start, end, line });
-    return acc;
-  }, []);
-
-  const lastLineOpacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
-
   return (
     <section
       ref={containerRef}
-      className="hidden md:block"
+      className="hidden xl:block my-32" // Using margins to create space from other sections
       style={{
-        height: "300vh",
+        height: "400vh", // Provides 4 screens worth of scroll distance for the acts
         position: "relative",
-        background: "#000000",
       }}
     >
-      {/* ── Sticky viewport ── */}
-      <div
-        className="sticky top-0 h-[100vh] flex flex-col items-center justify-center overflow-hidden"
-      >
-        {/* Background radial pulse */}
-        <motion.div
+      <div className="sticky top-0 h-screen w-full bg-[#000] overflow-hidden rounded-3xl border border-[#C9A355]/10 shadow-[0_0_100px_rgba(0,0,0,1)]">
+        
+        {/* Dynamic vignette / central glow */}
+        <motion.div 
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              "radial-gradient(ellipse at 50% 50%, rgba(201,163,85,0.04) 0%, transparent 65%)",
-            opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0.4]),
+            background: "radial-gradient(circle at 50% 50%, rgba(201,163,85,0.08) 0%, transparent 65%)",
+            opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 1, 0.3])
           }}
         />
 
-        {/* Scan line effect */}
-        <motion.div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            height: 1,
-            background:
-              "linear-gradient(90deg, transparent, rgba(201,163,85,0.12), transparent)",
-            top: useTransform(
-              scrollYProgress,
-              [0, 1],
-              ["0vh", "100vh"]
-            ),
-          }}
-        />
+        <GiantAstrolabe scrollProgress={scrollYProgress} />
 
-        {/* ── Story content ── */}
-        <div
-          style={{
-            maxWidth: 820,
-            width: "90%",
-            padding: "0 24px",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          {/* Section eyebrow */}
-          <motion.div
-            style={{
-              opacity: useTransform(scrollYProgress, [0, 0.06], [1, 0]),
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              marginBottom: 48,
-            }}
-          >
-            <div
-              style={{
-                height: 1,
-                width: 48,
-                background: "linear-gradient(90deg, transparent, #C9A355)",
-              }}
-            />
-            <span
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: "0.65rem",
-                fontWeight: 600,
-                letterSpacing: "0.3em",
-                textTransform: "uppercase",
-                color: "#C9A355",
-                opacity: 0.7,
-              }}
-            >
-              The Foundry Manifesto
+        {/* ACT 1 */}
+        <CinematicAct scrollProgress={scrollYProgress} range={[0, 0.25]}>
+          <h2 className="text-[#F4EFE6] text-7xl xl:text-8xl 2xl:text-9xl tracking-tight leading-none uppercase" style={{ fontFamily: "'Anton', sans-serif" }}>
+            FORGED IN <br/>
+            <span className="text-[#C9A355]" style={{ textShadow: "0 0 80px rgba(201,163,85,0.4)" }}>OBSESSION</span>
+          </h2>
+        </CinematicAct>
+
+        {/* ACT 2 */}
+        <CinematicAct scrollProgress={scrollYProgress} range={[0.25, 0.5]}>
+          <h2 className="text-[#F4EFE6] text-6xl xl:text-7xl 2xl:text-8xl tracking-tight leading-tight uppercase" style={{ fontFamily: "'Anton', sans-serif" }}>
+            EVERY CURVE <span className="font-serif italic text-[#C9A355] normal-case" style={{ fontFamily: "'Kaushan Script', cursive" }}>crafted.</span><br/>
+            EVERY GLYPH <span className="font-serif italic text-[#C9A355] normal-case" style={{ fontFamily: "'Kaushan Script', cursive" }}>perfected.</span>
+          </h2>
+        </CinematicAct>
+
+        {/* ACT 3 */}
+        <CinematicAct scrollProgress={scrollYProgress} range={[0.5, 0.75]}>
+          <h2 className="text-[#F4EFE6] text-6xl xl:text-7xl 2xl:text-8xl tracking-tight leading-none uppercase" style={{ fontFamily: "'Anton', sans-serif" }}>
+            We don't just draw letters.<br/>
+            <span className="text-[#C9A355] mt-6 block" style={{ textShadow: "0 0 80px rgba(201,163,85,0.4)" }}>
+              We engineer voices.
             </span>
-            <div
-              style={{
-                height: 1,
-                width: 48,
-                background: "linear-gradient(90deg, #C9A355, transparent)",
-              }}
+          </h2>
+        </CinematicAct>
+
+        {/* ACT 4 */}
+        <CinematicAct scrollProgress={scrollYProgress} range={[0.75, 1]}>
+          <h2 className="text-[#F4EFE6] text-8xl xl:text-9xl 2xl:text-[10rem] tracking-tighter leading-none uppercase" style={{ fontFamily: "'Anton', sans-serif" }}>
+            THIS IS<br/>
+            <span className="text-[#C9A355]" style={{ textShadow: "0 0 120px rgba(201,163,85,0.6)" }}>
+              THE FOUNDRY
+            </span>
+            <span className="text-[#C9A355]">.</span>
+          </h2>
+        </CinematicAct>
+
+        {/* Cinematic Scan Line / Film Grain overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.15]" 
+          style={{ 
+            background: "linear-gradient(rgba(255,255,255,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06))", 
+            backgroundSize: "100% 4px, 3px 100%" 
+          }} 
+        />
+        
+        {/* Progress Tracker Line */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-[200px] h-[2px] bg-white/10 rounded-full overflow-hidden">
+            <motion.div 
+                className="h-full bg-[#C9A355]"
+                style={{ 
+                    width: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
+                    boxShadow: "0 0 10px rgba(201,163,85,0.5)"
+                }}
             />
-          </motion.div>
-
-          {/* Words — rendered line by line */}
-          {lineData.map(({ start, end, line }, lineIdx) => {
-            const isLastLine = lineIdx === STORY_LINES.length - 1;
-            const lineStartFraction = (start / TOTAL_WORDS) * 0.95;
-
-            return (
-              <div key={lineIdx}>
-                {/* Line separator (between lines, not before first) */}
-                {lineIdx > 0 && (
-                  <LineSeparator
-                    scrollProgress={scrollYProgress}
-                    triggerAt={lineStartFraction}
-                  />
-                )}
-
-                {/* Words */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignItems: "baseline",
-                    justifyContent: isLastLine ? "center" : "flex-start",
-                    marginBottom: 4,
-                    // Last line gets extra top margin + center align
-                    marginTop: isLastLine ? 32 : 0,
-                  }}
-                >
-                  {line.map((word, wordIdx) => {
-                    const globalIdx = start + wordIdx;
-                    return (
-                      <Word
-                        key={`${lineIdx}-${wordIdx}`}
-                        word={word}
-                        index={globalIdx}
-                        scrollProgress={scrollYProgress}
-                      />
-                    );
-                  })}
-                </div>
-
-                {/* Last line underline ornament */}
-                {isLastLine && (
-                  <motion.div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      marginTop: 24,
-                      opacity: lastLineOpacity,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 160,
-                        height: 2,
-                        background:
-                          "linear-gradient(90deg, transparent, #C9A355, #F0D48A, #C9A355, transparent)",
-                        boxShadow: "0 0 12px rgba(201,163,85,0.5)",
-                      }}
-                    />
-                  </motion.div>
-                )}
-              </div>
-            );
-          })}
         </div>
 
-        {/* ── Scroll progress bar ── */}
-        <div
-          style={{
-            position: "absolute",
-            right: 24,
-            top: "50%",
-            transform: "translateY(-50%)",
-            height: 120,
-            width: 1,
-            background: "rgba(244,239,230,0.06)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <motion.div
-            style={{
-              width: 1,
-              background: "#C9A355",
-              boxShadow: "0 0 6px rgba(201,163,85,0.6)",
-              height: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
-              transformOrigin: "top",
-            }}
-          />
-        </div>
-
-        {/* ── Scroll cue (fades out quickly) ── */}
-        <motion.div
-          style={{
-            position: "absolute",
-            bottom: 40,
-            left: "50%",
-            transform: "translateX(-50%)",
-            opacity: useTransform(scrollYProgress, [0, 0.08], [1, 0]),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: "0.62rem",
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "#4A4540",
-              fontWeight: 500,
-            }}
-          >
-            Scroll
-          </span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              width: 1,
-              height: 32,
-              background:
-                "linear-gradient(180deg, #C9A355 0%, transparent 100%)",
-            }}
-          />
-        </motion.div>
+        {/* ── Animated Stamps ── */}
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="PREMIUM QUALITY • THE FOUNDRY • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.0, 0.25]}
+          initialPos={{ x: -450, y: -250 }}
+          targetPos={{ x: -300, y: -200 }}
+          rotateRange={[0, 90]}
+          size={240}
+        />
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="100% HAND CRAFTED • TYPE STUDIO • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.25, 0.5]}
+          initialPos={{ x: 450, y: 200 }}
+          targetPos={{ x: 300, y: 150 }}
+          rotateRange={[-45, 45]}
+          size={220}
+        />
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="NO AI CURVES • HUMAN MADE • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.5, 0.75]}
+          initialPos={{ x: -400, y: 250 }}
+          targetPos={{ x: -280, y: 180 }}
+          rotateRange={[90, -45]}
+          size={260}
+        />
+        <Stamp
+          scrollProgress={scrollYProgress}
+          text="NEW DELHI • ORIGINAL DESIGN • "
+          path="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+          triggerRange={[0.75, 1.0]}
+          initialPos={{ x: 400, y: -250 }}
+          targetPos={{ x: 250, y: -180 }}
+          rotateRange={[180, 0]}
+          size={250}
+        />
       </div>
     </section>
+  );
+}
+
+/* ── Animated Stamp Component ── */
+function Stamp({ scrollProgress, text, path, triggerRange, initialPos, targetPos, rotateRange, size = 180, scaleRange = [2, 1, 0.8] }) {
+  const opacity = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[0] + 0.05, triggerRange[1] - 0.05, triggerRange[1]],
+    [0, 1, 1, 0]
+  );
+  
+  const scale = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[0] + 0.1, triggerRange[1]],
+    scaleRange
+  );
+
+  const rotate = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[1]],
+    rotateRange
+  );
+
+  const x = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[1]],
+    [initialPos.x, targetPos.x]
+  );
+
+  const y = useTransform(
+    scrollProgress,
+    [triggerRange[0], triggerRange[1]],
+    [initialPos.y, targetPos.y]
+  );
+
+  const textId = `textPath-${text.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        x,
+        y,
+        scale,
+        rotate,
+        zIndex: 10,
+        pointerEvents: "none",
+        color: "#C9A355",
+        opacity: useTransform(opacity, o => o * 0.25), // Cinematic subtle overlay
+        width: size,
+        height: size,
+        marginLeft: -size / 2,
+        marginTop: -size / 2,
+      }}
+    >
+      <svg width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id={textId} d={path} fill="none"/>
+        <text style={{ fontSize: "19px", fontWeight: "bold", fontFamily: "'Inter', sans-serif", letterSpacing: "9px", textTransform: "uppercase" }} fill="currentColor">
+          <textPath href={`#${textId}`} startOffset="50%" textAnchor="middle">
+            {text}
+          </textPath>
+        </text>
+        <circle cx="100" cy="100" r="55" stroke="currentColor" strokeWidth="2" strokeDasharray="4 4" />
+        <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="1" />
+        <circle cx="100" cy="100" r="88" stroke="currentColor" strokeWidth="3" />
+        <text x="100" y="105" textAnchor="middle" style={{ fontSize: "24px", fontFamily: "'Anton', sans-serif", letterSpacing: "2px" }} fill="currentColor">EST.</text>
+        <text x="100" y="130" textAnchor="middle" style={{ fontSize: "16px", fontFamily: "'Inter', sans-serif", fontWeight: "bold", letterSpacing: "4px" }} fill="currentColor">2026</text>
+      </svg>
+    </motion.div>
   );
 }
